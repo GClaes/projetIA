@@ -1,10 +1,20 @@
 {% load static %} {% csrf_token %}
 
 <html>
+    <head>
+        <link rel="stylesheet" href="{% static 'game/css/new_game.css' %}">
+    </head>
     <body>
         <script src="{% static 'game/move.js' %}"></script>
         <title>Game</title>
-        <p><div id="my_board">{{board}}</div></p>
+        <h1>Voici le jeu dont je ne connais pas le nom!</h1>
+        <h3>{{players.0.name}} VS {{players.1.name}}</h3>
+
+        
+        <table style="margin-left: auto; margin-right: auto">
+
+        </table>
+
         <button id="my_button">Move</button>
     </body>
 </html>

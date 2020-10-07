@@ -13,7 +13,7 @@ class NewGameForm(forms.Form):
 
 def index(request):
     if request.method == "GET":
-        form = NewGameForm()
+        form = NewGameForm(auto_id='id_for_%s')
         return render(request, "game/index.html", { "form": form })
 
     if request.method == "POST": 
@@ -64,6 +64,10 @@ def index(request):
 def apply_move(request) :
 
     random_board = [[random.randint(0,2) for i in range(8)]for i in range(8)]
+    random_pos1= [random.randint(0,7),random.randint(0,7)]
+    random_pos2= [random.randint(0,7),random.randint(0,7)]
+
+
     game_state = {
         "game_id" : 11,
         "board" : random_board,
@@ -71,12 +75,14 @@ def apply_move(request) :
                 "id" :  10,
                 "name" : "Alice",
                 "color" : "cyan",
-                "position" : [0,0]
+                "position" : random_pos1
+
             },{
                 "id" :  20,
                 "name" : "Bob",
                 "color" : "orange",
-                "position" : [7,7]
+                "position" : random_pos2
+
             }],
         "current_player" : 1,
         "code" : 0

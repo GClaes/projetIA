@@ -1,0 +1,48 @@
+h1{
+    color: rebeccapurple;
+    font-size: 200%
+}
+h3{
+    color: darkcyan
+}
+.pos1{
+    border: dashed black 2px;
+    height: 50px;
+    width: 50px;
+    background: blue;
+    padding: 0px;
+}
+.pos2{
+    border: dashed black 2px;
+    padding: 0px;
+    height: 50px;
+    width: 50px;
+    background: red;
+}
+.couleur1{
+    height: 50px;
+    width: 50px;
+    background: blue;
+    padding: 1px;
+}
+.couleur2{
+    height: 50px;
+    width: 50px;
+    background: red;
+    padding: 1px;
+}
+.couleur3{
+    height: 50px;
+    width: 50px;
+    background: gray;
+    padding: 1px;
+}
+body{
+    background-image: url("./pictures/background.png");
+    background-repeat: no-repeat;
+    margin-left: auto;
+    text-align: center;
+}
+td{
+    padding: 1px;
+}
