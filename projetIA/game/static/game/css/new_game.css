@@ -5,20 +5,7 @@ h1{
 h3{
     color: darkcyan
 }
-.pos1{
-    border: dashed white 2px;
-    height: 50px;
-    width: 50px;
-    background: blue;
-    padding: 0px;
-}
-.pos2{
-    border: dashed black 2px;
-    padding: 0px;
-    height: 50px;
-    width: 50px;
-    background: red;
-}
+
 .couleur1{
     height: 50px;
     width: 50px;
@@ -45,4 +32,5 @@ body{
 }
 td{
     padding: 1px;
+    text-align: center
 }

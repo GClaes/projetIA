@@ -3,11 +3,13 @@ from django.http import HttpResponse
 from django import forms
 
 class ConnectionForm (forms.Form):
-    username = forms.CharField(label = "Username")
+    username = forms.CharField(label="Username")
     password = forms.CharField(label="Password", widget=forms.PasswordInput())
 
+
+
 class SignupForm (forms.Form):
-    username = forms.CharField(label = "Username")
+    username = forms.CharField(label="Username")
     password = forms.CharField(label="Password", widget=forms.PasswordInput())
     confirm_password = forms.CharField(label="Confirm Password", widget=forms.PasswordInput())
 
@@ -15,11 +17,15 @@ class SignupForm (forms.Form):
         #Définir condition
         cd=self.cleaned_data
 
+        #username = cd.get("username")
         password = cd.get("password")
         cpassword = cd.get("confirm_password")
 
         if password != cpassword:
             raise forms.ValidationError("Passwords did not match")
+
+        #Rechercher si username existant
+        #raise forms.ValidationError("User does already exist")
 
         return cd
         

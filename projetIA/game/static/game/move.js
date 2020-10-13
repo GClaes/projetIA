@@ -2,52 +2,57 @@ window.onload = function() {
     document.getElementById("my_button").addEventListener("click", () => {
         main();
     });
-    this.initBoard();
+    let pos = [[0,0], [7,7]]
+    this.initBoard(pos);
 }
 async function main() {
     const response = await jsonRPC("/game/move", {game_id: "1", player_id: "42", move: [1, 0]});
-    let board = document.getElementById("board");
-    updateBoard(response.board, board);
+    console.log(response);
+    let pos = [];
+    for(player of response.players){
+      pos[pos.length] = player.position;
+    }
+    updateBoard(response.board, pos);
 }
 
-function initBoard(){
-  let basicBoard = [[3,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,4]];
-  this.updateBoard(basicBoard, document.getElementById("board"));
+function initBoard(pos){
+  let basicBoard = [[1,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,2]];
+
+  this.updateBoard(basicBoard, pos);
 }
 
-function updateBoard(boardContent, board){
+function updateBoard(boardContent, pos){
+
   let table = document.querySelector("table");
   table.textContent="";
-  generateTable(table, boardContent);
+  generateTable(table, boardContent, pos);
 }
 
-function generateTable(table, data) {
+function generateTable(table, data, pos) {
   for (let element of data) {
     let row = table.insertRow();
     for (key in element) {
       let cell = row.insertCell();
-      let content = document.createTextNode(element[key]);
-      
+
       if(element[key] == 1){
         cell.className = "couleur1"
       }
       else if (element[key] == 2){
         cell.className = "couleur2"
       }
-      else if(element[key] == 3){
-        cell.className="pos1"
-        element[key] = 1
-      }
-      else if(element[key] == 4){
-        cell.className="pos2"
-        element[key] = 2
-      }
       else{
         cell.className="couleur3"
-      }
-      
-      cell.appendChild(content);
+      }  
     }
+  }
+  for (let position in pos){
+
+    let posX = pos[position][0]
+    let posY = pos[position][1]
+    
+    let ligne1 = table.getElementsByTagName('tr')[posX];
+    let cell1 = ligne1.getElementsByTagName('td')[posY];
+    cell1.textContent= position   
   }
 }
 
