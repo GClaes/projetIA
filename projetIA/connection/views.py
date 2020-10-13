@@ -6,6 +6,25 @@ class ConnectionForm (forms.Form):
     username = forms.CharField(label = "Username")
     password = forms.CharField(label="Password", widget=forms.PasswordInput())
 
+class SignupForm (forms.Form):
+    username = forms.CharField(label = "Username")
+    password = forms.CharField(label="Password", widget=forms.PasswordInput())
+    confirm_password = forms.CharField(label="Confirm Password", widget=forms.PasswordInput())
+
+    def clean (self):
+        #Définir condition
+        cd=self.cleaned_data
+
+        password = cd.get("password")
+        cpassword = cd.get("confirm_password")
+
+        if password != cpassword:
+            raise forms.ValidationError("Passwords did not match")
+
+        return cd
+        
+
+
 
 
 def index(request):
@@ -20,3 +39,19 @@ def index(request):
             # Check credentials
             return HttpResponse("OK")
         return HttpResponse("KO")
+
+
+def signup(request):
+    if request.method == "GET":
+        form = SignupForm()
+        return render(request, "connection/signup.html", { "form": form })
+    if request.method == "POST":
+        form = SignupForm(request.POST) #auto fill form with info in POST
+        if form.is_valid():
+            #Enregister en base de données
+            username = form.cleaned_data.get("username") #Permet d'accéder aux champs
+            password = form.cleaned_data.get("password")
+            cpassword = form.cleaned_data.get("confirm_password")
+            return HttpResponse("You are correctly signed up "+username+"//"+password+"//"+cpassword)
+
+        return render(request, "connection/signup.html", { "form": form })

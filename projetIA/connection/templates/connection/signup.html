@@ -8,13 +8,11 @@
 
   <body>
     <title>Connection</title>
-    <h1>Welcome</h1>
-    <form method="POST" action="/connection/">
+    <h1>Sign Up form</h1>
+    <form method="POST" action="/connection/signup">
         {% csrf_token %}
-        {{ form }}
+        {{ form.as_p }}
         <input type="submit"/>
     </form>
-
-    <a href="signup">Click here to create an account</a>
   </body>
 </html>
