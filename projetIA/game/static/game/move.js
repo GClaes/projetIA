@@ -49,10 +49,10 @@ function generateTable(table, data, pos) {
 
     let posX = pos[position][0]
     let posY = pos[position][1]
-    
     let ligne1 = table.getElementsByTagName('tr')[posX];
     let cell1 = ligne1.getElementsByTagName('td')[posY];
-    cell1.textContent= position   
+
+    cell1.textContent= "J"+position 
   }
 }
 

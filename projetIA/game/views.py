@@ -42,7 +42,7 @@ def index(request):
         return HttpResponse("KO")
 
 def apply_move(request) :
-
+    test = json.loads(request.body.decode())
     random_board = [[random.randint(0,2) for i in range(8)]for i in range(8)]
     random_pos1= [random.randint(0,7),random.randint(0,7)]
     random_pos2= [random.randint(0,7),random.randint(0,7)]
@@ -65,6 +65,7 @@ def apply_move(request) :
 
             }],
         "current_player" : 1,
-        "code" : 0
+        "code" : 0, 
+        "test" : test
     }
     return JsonResponse(game_state)
