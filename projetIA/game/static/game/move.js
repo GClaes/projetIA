@@ -1,12 +1,22 @@
 window.onload = function() {
-    document.getElementById("my_button").addEventListener("click", () => {
-        main();
+    document.getElementById("bdown").addEventListener("click", () => {
+        main([1,0]); //[1,0]
     });
+    document.getElementById("bleft").addEventListener("click", () => {
+      main([0,-1]); //[0,-1]
+    });
+    document.getElementById("bright").addEventListener("click", () => {
+        main([0,1]); //[0,1]
+    });
+    document.getElementById("bup").addEventListener("click", () => {
+      main([-1,0]); //[-1,0]
+    });
+
     let pos = [[0,0], [7,7]]
     this.initBoard(pos);
 }
-async function main() {
-    const response = await jsonRPC("/game/move", {game_id: "1", player_id: "42", move: [1, 0]});
+async function main(movement) {
+    const response = await jsonRPC("/game/move", {game_id: "1", player_id: "42", move: movement});
     console.log(response);
     let pos = [];
     for(player of response.players){

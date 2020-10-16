@@ -42,30 +42,60 @@ def index(request):
         return HttpResponse("KO")
 
 def apply_move(request) :
-    test = json.loads(request.body.decode())
-    random_board = [[random.randint(0,2) for i in range(8)]for i in range(8)]
-    random_pos1= [random.randint(0,7),random.randint(0,7)]
-    random_pos2= [random.randint(0,7),random.randint(0,7)]
+    rcontent = json.loads(request.body.decode())
+    movement = rcontent.get("move")
+    p_player = rcontent.get("player_id")
 
+    #Recupérer le game_state en DB
 
+    #Game_state doit être supp pour utiliser la DB
     game_state = {
         "game_id" : 11,
-        "board" : random_board,
+        "board" : [[1,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,2]],
         "players" : [{
                 "id" :  10,
                 "name" : "Alice",
                 "color" : "cyan",
-                "position" : random_pos1
+                "position" : [0,0]
 
             },{
                 "id" :  20,
                 "name" : "Bob",
                 "color" : "orange",
-                "position" : random_pos2
+                "position" : [7,7]
 
             }],
         "current_player" : 1,
         "code" : 0, 
-        "test" : test
     }
+
+
+    #Le code sera à modifier pour le rendre plus fonctionnel paradigment parlant
+    #+Encore données brutes
+    player1 = game_state.get("players")[0]
+    pos_player1 = player1.get("position")
+    pos = calculate_position(pos_player1, movement)
+    game_state["players"][0]["position"] = pos
+
+    board = game_state.get("board")
+    players = game_state.get("players")
+    board = update_board_content(board, player1, players.index(player1))
+    game_state["board"]=board
+
+    #Sauver le game_state en DB
+
     return JsonResponse(game_state)
+
+#Rendre plus fonctionnel
+def calculate_position(player_pos, movement):
+    position =  [player_pos[0]+movement[0], player_pos[1]+movement[1]]
+    for pos in position:
+        if pos < 0 or pos > 7:
+            return player_pos
+
+    return position
+
+def update_board_content(board, player, index):
+    position = player.get("position")
+    board[position[0]][position[1]] = index+1
+    return board
