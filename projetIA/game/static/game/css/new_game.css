@@ -34,3 +34,40 @@ td{
     padding: 1px;
     text-align: center
 }
+
+#wrapper {
+    display: flex;
+    height: 100vh;
+    justify-content: center;
+}
+  
+#controls {
+    display: inline-grid;
+    grid-column-gap: 0;
+    align-self: end;
+}
+  
+.movements_control {
+    border: solid 1px black;  
+    margin: 0;
+    padding: 0;
+}
+  
+#bup {
+    grid-column-start: 2;
+}
+  
+#bleft {
+    grid-column-start: 1;
+}
+  
+#bdown {
+    grid-column-start: 2;
+}
+  
+#bright {
+    grid-column-start: 3;
+}
+img{
+    width: 25px
+}

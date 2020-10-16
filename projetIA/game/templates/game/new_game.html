@@ -15,9 +15,13 @@
 
         </table>
 
-        <button id="bdown" name="bdown">Move Down</button>
-        <button id="bup" name="bup">Move Up</button>
-        <button id="bright" name="bright">Move Right</button>
-        <button id="bleft" name="bleft">Move Left</button>
+        <div id="wrapper">
+            <div id="controls">
+                <button id="bup" class="movements_control" name="bup"><img src="{% static 'game/css/pictures/key_up.png' %}"></button>
+                <button id="bleft" class="movements_control" name="bleft"><img src="{% static 'game/css/pictures/key_left.png' %}"></button>
+                <button id="bright" class="movements_control" name="bright"><img src="{% static 'game/css/pictures/key_right.png' %}"></button>
+                <button id="bdown" class="movements_control" name="bdown"><img src="{% static 'game/css/pictures/key_down.png' %}"></button>
+            </div>
+        </div>
     </body>
 </html>

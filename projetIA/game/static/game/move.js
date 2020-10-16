@@ -1,15 +1,15 @@
 window.onload = function() {
     document.getElementById("bdown").addEventListener("click", () => {
-        main([1,0]); //[1,0]
+        main([1,0]); //l'axe X et l'axe Y sont inversés car génération de table selon un tableau à 2d
     });
     document.getElementById("bleft").addEventListener("click", () => {
-      main([0,-1]); //[0,-1]
+      main([0,-1]);
     });
     document.getElementById("bright").addEventListener("click", () => {
-        main([0,1]); //[0,1]
+        main([0,1]);
     });
     document.getElementById("bup").addEventListener("click", () => {
-      main([-1,0]); //[-1,0]
+      main([-1,0]);
     });
 
     let pos = [[0,0], [7,7]]
