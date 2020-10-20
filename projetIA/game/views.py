@@ -91,6 +91,7 @@ def calculate_position(player_pos, movement):
     position =  [player_pos[0]+movement[0], player_pos[1]+movement[1]]
     for pos in position:
         if pos < 0 or pos > 7:
+            #Raise error
             return player_pos
 
     return position
