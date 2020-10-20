@@ -16,7 +16,7 @@ class ConnectionForm (forms.Form):
         try:
             user = User.manager.get(username = c_username)
         except User.DoesNotExist: #Aucune idée de pourquoi c'est souligné en rouge alors que c'est bon ?
-            raise forms.ValidationError("User do not exist")
+            raise forms.ValidationError("User doesn't exist")
 
         if(user.user_data.password != c_password):
             raise forms.ValidationError("Incorrect password")
@@ -45,8 +45,8 @@ class SignupForm (forms.Form):
         except User.DoesNotExist: #Aucune idée de pourquoi c'est souligné en rouge alors que c'est bon ?
             return cd
         raise forms.ValidationError("User does already exist")
-
         
+
 
 
 def index(request):

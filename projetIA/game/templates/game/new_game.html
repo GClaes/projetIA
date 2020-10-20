@@ -5,12 +5,31 @@
         <link rel="stylesheet" href="{% static 'game/css/new_game.css' %}">
     </head>
     <body>
+        <script>
+            let board = {{board}};
+            let pos1 = {{players.0.position}};
+            let pos2 = {{players.1.position}};
+            let pos = new Array(pos1, pos2);
+            let game_id = "{{game_id}}";
+            let curr_player = {{current_player}};
+
+            let current_player_id = "{{players.1}}"
+
+            console.log(game_id)
+            console.log(current_player_id)
+
+        </script>
         <script src="{% static 'game/move.js' %}"></script>
         <title>Game</title>
         <h1>Voici le jeu dont je ne connais pas le nom!</h1>
         <h3>{{players.0.name}} VS {{players.1.name}}</h3>
 
-        
+        {% if current_player == 0 %}
+            <h4>{{players.0.name}} (P{{current_player}}) to play</h4>
+        {% else %}
+            <h4>{{players.1.name}} (P{{current_player}}) to play</h4>
+        {% endif %}
+
         <table style="margin-left: auto; margin-right: auto">
 
         </table>

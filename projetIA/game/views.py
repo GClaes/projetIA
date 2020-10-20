@@ -1,9 +1,10 @@
 from django.shortcuts import render
 from django.http import HttpResponse, JsonResponse
 import json
-
 from django import forms
 import random
+from game.models import Game_Player, Game_State
+from connection.models import User
  
 
 class NewGameForm(forms.Form):
@@ -18,25 +19,37 @@ def index(request):
 
     if request.method == "POST": 
         form = NewGameForm(request.POST)
-
         if form.is_valid():
+            board = [[1,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,2]]
+            game_state1 = Game_State(current_player=1, board=board)
+            game_state1.save()
+
+            username1 = form.cleaned_data.get("player1")
+            username2 = form.cleaned_data.get("player2")
+            u1 = User.manager.get(username = username1)
+            u2 = User.manager.get(username = username2)
+            game_player1 = Game_Player(user=u1, game_state=game_state1, pos=[0,0])
+            game_player2 = Game_Player(user=u2, game_state=game_state1, pos=[7,7])
+
+
             game_state = {
-                "game_id" : 11,
-                "board" : [[1,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,2]],
+                "game_id" : game_state1.auto_increment_id,
+                "board" : game_state1.board,
                 "players" : [{
-                        "id" :  10,
-                        "name" : form.cleaned_data.get("player1"),
+                        "id" :  game_player1.auto_increment_id,
+                        "name" : game_player1.user.username,
                         "color" : "cyan",
-                        "position" : [2,2]
+                        "position" : game_player1.pos
                     },{
-                        "id" :  20,
-                        "name" : form.cleaned_data.get("player2"),
+                        "id" :  game_player2.auto_increment_id,
+                        "name" : game_player2.user.username,
                         "color" : "orange",
-                        "position" : [4,5]
+                        "position" : game_player2.pos
                     }],
-                "current_player" : 1,
-                "code" : 0
+                "current_player" : 0,
+                "code" : 0,
             }
+
             return render(request, 'game/new_game.html', game_state)
 
         return HttpResponse("KO")
@@ -45,10 +58,46 @@ def apply_move(request) :
     rcontent = json.loads(request.body.decode())
     movement = rcontent.get("move")
     p_player = rcontent.get("player_id")
+    game_id = rcontent.get("game_id")
 
     #Recupérer le game_state en DB
+    game_state1 = Game_State.manager.get(auto_increment_id=game_id)
+    players = Game_Player.manager.all().filter(game_state = game_state1)
+
+    u1 = User.manager.get(username = p_player)
+
+
+
+    #Changer Current_player
+    """
+    for player in game_players:
+        if player.auto_increment_id == p_player:
+            curr_player = game_players.index(player)
+"""
+    
+    """
+    game_state = {
+        "game_id" : game_state1.auto_increment_id,
+        "board" : game_state1.board,
+        "players" : [{
+                "id" :  game_players[0].auto_increment_id,
+                "name" : game_players[0].user.username,
+                "color" : game_players[0].user.color1,
+                "position" : game_players[0].pos,
+
+            },{
+                "id" :  game_players[1].auto_increment_id,
+                "name" : game_players[1].user.username,
+                "color" : game_players[1].user.color1,
+                "position" : game_players[1].pos,
+
+            }],
+        "current_player" : curr_player,
+        "code" : 0, 
+    }"""
 
     #Game_state doit être supp pour utiliser la DB
+    
     game_state = {
         "game_id" : 11,
         "board" : [[1,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,2]],
@@ -67,6 +116,7 @@ def apply_move(request) :
             }],
         "current_player" : 1,
         "code" : 0, 
+        "test": u1
     }
 
 

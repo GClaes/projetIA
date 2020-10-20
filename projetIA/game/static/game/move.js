@@ -10,25 +10,17 @@ window.onload = function() {
     });
     document.getElementById("bup").addEventListener("click", () => {
       main([-1,0]);
-    });
-
-    let pos = [[0,0], [7,7]]
-    this.initBoard(pos);
+    });    
+    this.updateBoard(board, pos);
 }
 async function main(movement) {
-    const response = await jsonRPC("/game/move", {game_id: "1", player_id: "42", move: movement});
-    console.log(response);
+    const response = await jsonRPC("/game/move", {game_id: game_id, player_id: curr_player, move: movement});
+
     let pos = [];
     for(player of response.players){
       pos[pos.length] = player.position;
     }
     updateBoard(response.board, pos);
-}
-
-function initBoard(pos){
-  let basicBoard = [[1,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,2]];
-
-  this.updateBoard(basicBoard, pos);
 }
 
 function updateBoard(boardContent, pos){
@@ -62,7 +54,7 @@ function generateTable(table, data, pos) {
     let ligne1 = table.getElementsByTagName('tr')[posX];
     let cell1 = ligne1.getElementsByTagName('td')[posY];
 
-    cell1.textContent= "J"+position 
+    cell1.textContent= "P"+position 
   }
 }
 
