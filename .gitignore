@@ -123,3 +123,4 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+projetIA/connection/migrations/0002_auto_20201020_1330.py
