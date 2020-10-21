@@ -5,6 +5,7 @@ from django import forms
 import random
 from game.models import Game_Player, Game_State
 from connection.models import User
+import ast
  
 
 class NewGameForm(forms.Form):
@@ -29,7 +30,9 @@ def index(request):
             u1 = User.manager.get(username = username1)
             u2 = User.manager.get(username = username2)
             game_player1 = Game_Player(user=u1, game_state=game_state1, pos=[0,0])
+            game_player1.save()
             game_player2 = Game_Player(user=u2, game_state=game_state1, pos=[7,7])
+            game_player2.save()
 
 
             game_state = {
@@ -61,51 +64,25 @@ def apply_move(request) :
     game_id = rcontent.get("game_id")
 
     #Recupérer le game_state en DB
-    game_state1 = Game_State.manager.get(auto_increment_id=game_id)
-    players = Game_Player.manager.all().filter(game_state = game_state1)
+    game_state_data = Game_State.manager.get(auto_increment_id=game_id)
+    game_state_data.board = ast.literal_eval(game_state_data.board)
+    game_players = Game_Player.manager.all().filter(game_state = game_state_data)
+    game_player1 = game_players[0]
+    print(game_player1.auto_increment_id)
+    print(game_player1.pos)
+    game_player1.pos = ast.literal_eval(game_player1.pos)
+    game_player2 = game_players[1]
+ 
 
-    u1 = User.manager.get(username = p_player)
 
-
-
-    #Changer Current_player
-    """
-    for player in game_players:
-        if player.auto_increment_id == p_player:
-            curr_player = game_players.index(player)
-"""
-    
-    """
     game_state = {
-        "game_id" : game_state1.auto_increment_id,
-        "board" : game_state1.board,
+        "game_id" : game_state_data.auto_increment_id,
+        "board" : game_state_data.board,
         "players" : [{
-                "id" :  game_players[0].auto_increment_id,
-                "name" : game_players[0].user.username,
-                "color" : game_players[0].user.color1,
-                "position" : game_players[0].pos,
-
-            },{
-                "id" :  game_players[1].auto_increment_id,
-                "name" : game_players[1].user.username,
-                "color" : game_players[1].user.color1,
-                "position" : game_players[1].pos,
-
-            }],
-        "current_player" : curr_player,
-        "code" : 0, 
-    }"""
-
-    #Game_state doit être supp pour utiliser la DB
-    
-    game_state = {
-        "game_id" : 11,
-        "board" : [[1,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,2]],
-        "players" : [{
-                "id" :  10,
-                "name" : "Alice",
-                "color" : "cyan",
-                "position" : [0,0]
+                "id" :  game_player1.auto_increment_id,
+                "name" : game_player1.user.username,
+                "color" : game_player1.user.color1,
+                "position" : game_player1.pos
 
             },{
                 "id" :  20,
@@ -116,16 +93,16 @@ def apply_move(request) :
             }],
         "current_player" : 1,
         "code" : 0, 
-        "test": u1
     }
 
-
+    
     #Le code sera à modifier pour le rendre plus fonctionnel paradigment parlant
     #+Encore données brutes
     player1 = game_state.get("players")[0]
     pos_player1 = player1.get("position")
     pos = calculate_position(pos_player1, movement)
     game_state["players"][0]["position"] = pos
+    game_player1.pos = pos
 
     board = game_state.get("board")
     players = game_state.get("players")
@@ -133,9 +110,27 @@ def apply_move(request) :
     game_state["board"]=board
 
     #Sauver le game_state en DB
+    game_state_data.save()
+    game_player1.save()
+
 
     return JsonResponse(game_state)
 
+
+
+
+
+
+
+    #Changer Current_player
+    """
+    for player in game_players:
+        if player.auto_increment_id == p_player:
+            curr_player = game_players.index(player)
+    """
+
+
+    
 #Rendre plus fonctionnel
 def calculate_position(player_pos, movement):
     position =  [player_pos[0]+movement[0], player_pos[1]+movement[1]]

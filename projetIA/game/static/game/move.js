@@ -6,7 +6,7 @@ window.onload = function() {
       main([0,-1]);
     });
     document.getElementById("bright").addEventListener("click", () => {
-        main([0,1]);
+      main([0,1]);
     });
     document.getElementById("bup").addEventListener("click", () => {
       main([-1,0]);
@@ -14,7 +14,7 @@ window.onload = function() {
     this.updateBoard(board, pos);
 }
 async function main(movement) {
-    const response = await jsonRPC("/game/move", {game_id: game_id, player_id: curr_player, move: movement});
+    const response = await jsonRPC("/game/move", {game_id: game_id, player_id: current_player_id, move: movement});
 
     let pos = [];
     for(player of response.players){
