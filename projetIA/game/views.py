@@ -35,7 +35,7 @@ def index(request):
             game_player2.save()
 
 
-            game_state = {
+            game_state = { 
                 "game_id" : game_state1.auto_increment_id,
                 "board" : game_state1.board,
                 "players" : [{
@@ -128,8 +128,14 @@ def apply_move(request) :
         if player.auto_increment_id == p_player:
             curr_player = game_players.index(player)
     """
-
-
+"""
+def change_player(list_player,index_player):
+    if(index_player==len(list_player)):
+        index_player=0
+    else
+        index_player+=1
+    return index_player
+"""
     
 #Rendre plus fonctionnel
 def calculate_position(player_pos, movement):
