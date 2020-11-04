@@ -14,13 +14,14 @@ window.onload = function() {
     this.updateBoard(board, pos);
 }
 async function main(movement) {
-    const response = await jsonRPC("/game/move", {game_id: game_id, player_id: curr_player, move: movement});
-    let pos = [];
-    for(player of response.players){
-      pos[pos.length] = player.position;
-    }
-    updateBoard(response.board, pos);
-    curr_player = changePlayer(curr_player, response.players);
+  const response = await jsonRPC("/game/move", {game_id: game_id, player_id: curr_player, move: movement});
+  let pos = [];
+  for(player of response.players){
+    pos[pos.length] = player.position;
+  }
+  updateBoard(response.board, pos);
+  curr_player = changePlayer(curr_player, response.players);
+  printPlayerToPlay(response.players, curr_player);
 }
 
 function updateBoard(boardContent, pos){
@@ -97,6 +98,15 @@ function changePlayer(curr_player, players){
       else{
         return players[indice+1].id;
       }
+    }
+  }
+}
+
+function printPlayerToPlay(players, indice){
+  console.log("test")
+  for(let player of players){
+    if(player.id == indice){
+      document.getElementById("player_to_play").textContent= "P"+players.indexOf(player)+" to play";
     }
   }
 }

@@ -52,6 +52,11 @@ td{
     margin: 0;
     padding: 0;
 }
+
+#player_to_play{
+    font-size: 200%;
+    font-weight: bold;
+}
   
 #bup {
     grid-column-start: 2;
