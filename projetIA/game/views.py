@@ -37,7 +37,7 @@ def index(request):
             game_player2.save()
 
             
-            game_state = build_game_state(game_state_data, [game_player1, game_player2])
+            game_state = build_game_state(game_state_data, [game_player1, game_player2], game_player1.auto_increment_id)
 
             return render(request, 'game/new_game.html', game_state)
 
@@ -60,14 +60,18 @@ def apply_move(request) :
     game_player2 = game_players[1]
     #
     
-    game_state_data = move_pos(game_player1, movement, game_state_data, game_players)
-    game_state = build_game_state(game_state_data, game_players)
-
-
+    #Changer le joueur qui joue
+    indice = index_player(int(p_player), game_players)
+    curr_player = change_player(game_players, p_player)
+    game_state_data = move_pos(game_players[indice], movement, game_state_data, game_players)
+    game_state = build_game_state(game_state_data, game_players, curr_player)
+    game_state_data.current_player = game_state.get("current_player")
 
     #Persister les données
     save_data(game_state_data)
     save_data(game_player1)
+    save_data(game_player2)
+
 
 
     return JsonResponse(game_state)

@@ -14,13 +14,13 @@ window.onload = function() {
     this.updateBoard(board, pos);
 }
 async function main(movement) {
-    const response = await jsonRPC("/game/move", {game_id: game_id, player_id: current_player_id, move: movement});
-
+    const response = await jsonRPC("/game/move", {game_id: game_id, player_id: curr_player, move: movement});
     let pos = [];
     for(player of response.players){
       pos[pos.length] = player.position;
     }
     updateBoard(response.board, pos);
+    curr_player = changePlayer(curr_player, response.players);
 }
 
 function updateBoard(boardContent, pos){
@@ -85,4 +85,18 @@ function jsonRPC(url, data) {
       };
       xhr.send(JSON.stringify(data));
     });
+}
+
+function changePlayer(curr_player, players){
+  for (let player of players){
+    if(player.id == curr_player){
+      indice = players.indexOf(player);
+      if(indice == players.length-1){
+        return players[0].id;
+      }
+      else{
+        return players[indice+1].id;
+      }
+    }
+  }
 }

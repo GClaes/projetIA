@@ -1,11 +1,16 @@
 import ast
 
-def change_player(list_player,index_player):
-    index_player+=1
-    if(index_player==len(list_player)):
-        index_player=0
-    return index_player
+def change_player(players,index_player):
+    print(index_player)
+    index_player = int(index_player)
+    return 0 if index_player == len(players)-1 else index_player+1
 
+
+def index_player(id_player, players):
+    for player in players:
+        if player.auto_increment_id == id_player:
+            return players.index(player)
+    return None
     
 def calculate_position(player_pos, movement):
     position =  [player_pos[0]+movement[0], player_pos[1]+movement[1]]
@@ -36,7 +41,7 @@ def convert_pos(player):
     player.pos = string_to_list(player.pos)
     return player
 
-def build_game_state(game_state_data, players):
+def build_game_state(game_state_data, players, curr_player):
 
     players = build_players_entities(players)
 
@@ -44,7 +49,7 @@ def build_game_state(game_state_data, players):
         "game_id" : game_state_data.auto_increment_id,
         "board" : game_state_data.board,
         "players" : players,
-        "current_player" : 1,
+        "current_player" : curr_player,
         "code" : 0, 
     }
 
