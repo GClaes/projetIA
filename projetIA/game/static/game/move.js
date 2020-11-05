@@ -19,9 +19,23 @@ async function main(movement) {
   for(player of response.players){
     pos[pos.length] = player.position;
   }
-  updateBoard(response.board, pos);
-  curr_player = changePlayer(curr_player, response.players);
+  if(response.code == 0){
+    document.getElementById("errors").textContent= "";
+    curr_player = changePlayer(curr_player, response.players);
+    updateBoard(response.board, pos);
+  }
+  else if (response.code == 1){
+    document.getElementById("errors").textContent= "Out of board action, try another move";
+  }
+  else if (response.code == 2){
+    document.getElementById("errors").textContent= "You cannot go on an enemy cell, try another move";
+  }
   printPlayerToPlay(response.players, curr_player);
+  console.log(response.winner)
+  if (response.winner != undefined){
+    document.getElementById("wrapper").textContent= "";
+    document.getElementById("player_to_play").textContent= "End of the game, the winner is: "+response.winner;
+  }
 }
 
 function updateBoard(boardContent, pos){
@@ -103,7 +117,6 @@ function changePlayer(curr_player, players){
 }
 
 function printPlayerToPlay(players, indice){
-  console.log("test")
   for(let player of players){
     if(player.id == indice){
       document.getElementById("player_to_play").textContent= "P"+players.indexOf(player)+" to play";

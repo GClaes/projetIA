@@ -1,4 +1,5 @@
 import ast
+from game.exceptions import *
 
 def change_player(players,index_player):
     print(index_player)
@@ -16,15 +17,16 @@ def calculate_position(player_pos, movement):
     position =  [player_pos[0]+movement[0], player_pos[1]+movement[1]]
     for pos in position:
         if pos < 0 or pos > 7:
-            #Raise error
-            return player_pos
-
+            raise OufOfBoardError("Test", "OutOfBoardError has occured")
     return position
 
-def update_board_content(board, player, num_player):
+def update_board_content(board, player, num_player, previous_pos):
     position = player.pos
+    if board[position[0]][position[1]] != num_player+1 and board[position[0]][position[1]] != 0:
+        player.pos = previous_pos
+        raise NotEmptyCellError("Test", "NotEmptyCellError has occured")
     board[position[0]][position[1]] = num_player+1
-    return board
+    return board, player.pos
 
 def string_to_list(s):
     return ast.literal_eval(s)
@@ -41,7 +43,7 @@ def convert_pos(player):
     player.pos = string_to_list(player.pos)
     return player
 
-def build_game_state(game_state_data, players, curr_player):
+def build_game_state(game_state_data, players, curr_player, code_error):
 
     players = build_players_entities(players)
 
@@ -50,7 +52,7 @@ def build_game_state(game_state_data, players, curr_player):
         "board" : game_state_data.board,
         "players" : players,
         "current_player" : curr_player,
-        "code" : 0, 
+        "code" : code_error, 
     }
 
     return game_state
@@ -69,6 +71,27 @@ def build_players_entities(players):
     return players_obj
 
 def move_pos(player, movement, game_state, players):
+    previous_pos = player.pos
     player.pos = calculate_position(player.pos, movement)
-    game_state.board = update_board_content(game_state.board, player, players.index(player))
+    game_state.board, player.pos = update_board_content(game_state.board, player, players.index(player), previous_pos)
     return game_state
+
+def search_player_by_id(players, id):
+    for player in players:
+        if player.auto_increment_id == id:
+            return player.user.username
+
+def count_elements(stats, element):
+    if(stats.get(element,0)==0):
+        stats[element] = 1
+    else:
+        stats.update({element:stats.get(element)+1})
+    return stats
+
+def define_winner(board):
+    stats = {}
+    for line in board:
+        for cell in line:
+            stats = count_elements(stats, cell)
+
+    return max(stats, key=stats.get)

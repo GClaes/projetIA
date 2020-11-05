@@ -8,6 +8,8 @@ from connection.models import User
 import ast
 from game.business import *
 from game.services import *
+from game.exceptions import *
+
  
 
 class NewGameForm(forms.Form):
@@ -23,6 +25,8 @@ def index(request):
     if request.method == "POST": 
         form = NewGameForm(request.POST)
         if form.is_valid():
+            #[[1,0,1,1,1,1,1,1],[1,1,1,1,1,1,1,1],[1,1,1,1,1,1,1,1],[1,1,1,1,1,1,1,1],[1,1,1,1,1,1,1,1],[1,1,1,1,1,1,1,1],[1,1,1,1,1,1,1,1],[1,1,1,1,1,1,1,2]]
+            #[[1,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,2]]
             board = [[1,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,2]]
             game_state_data = Game_State(current_player=1, board=board)
             game_state_data.save()
@@ -37,7 +41,7 @@ def index(request):
             game_player2.save()
 
             
-            game_state = build_game_state(game_state_data, [game_player1, game_player2], game_player1.auto_increment_id)
+            game_state = build_game_state(game_state_data, [game_player1, game_player2], game_player1.auto_increment_id,0)
 
             return render(request, 'game/new_game.html', game_state)
 
@@ -62,10 +66,36 @@ def apply_move(request) :
     
     #Changer le joueur qui joue
     indice = index_player(int(p_player), game_players)
-    curr_player = change_player(game_players, p_player)
-    game_state_data = move_pos(game_players[indice], movement, game_state_data, game_players)
-    game_state = build_game_state(game_state_data, game_players, curr_player)
+    curr_player = p_player
+    try:
+        game_state_data = move_pos(game_players[indice], movement, game_state_data, game_players)
+    except OufOfBoardError as e:
+        print(e.message)
+        game_state = build_game_state(game_state_data, game_players, curr_player, 1)
+    except NotEmptyCellError as e:
+        print(e.message)
+        game_state = build_game_state(game_state_data, game_players, curr_player, 2)
+    else:
+        endgame = []
+        for line in game_state_data.board:
+            endgame.append(line.count(0) == 0)
+        if all(endgame):
+            #Il ne peut y avoir qu'un seul vainqueur...
+            print("End of the game")
+            game_state = build_game_state(game_state_data, game_players, curr_player, 0)
+            winner_id = define_winner(game_state.get("board"))
+            game_state["winner"] =  game_players[winner_id-1].user.username
+        else:
+            curr_player = change_player(game_players, p_player)
+            game_state = build_game_state(game_state_data, game_players, curr_player, 0)
+
     game_state_data.current_player = game_state.get("current_player")
+
+
+    
+
+
+
 
     #Persister les données
     save_data(game_state_data)
