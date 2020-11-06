@@ -74,6 +74,7 @@ def move_pos(player, movement, game_state, players):
     previous_pos = player.pos
     player.pos = calculate_position(player.pos, movement)
     game_state.board, player.pos = update_board_content(game_state.board, player, players.index(player), previous_pos)
+    complete_boxes(game_state.board,players.index(player)+1,player.pos)
     return game_state
 
 def search_player_by_id(players, id):
@@ -95,3 +96,100 @@ def define_winner(board):
             stats = count_elements(stats, cell)
 
     return max(stats, key=stats.get)
+
+def complete_boxes(board,player,coord):
+    list_coor=[]
+    completed_liste=[]
+    if coord[0]>1 and board[coord[0]-1][coord[1]]==0:
+        coord1=[coord[0]-1,coord[1]]
+        list_coor.append(coord1)       
+    if coord[0]<len(board)-1 and board[coord[0]+1][coord[1]]==0:
+        coord2=[coord[0]+1,coord[1]]
+        list_coor.append(coord2)
+    if coord[1]>1 and board[coord[0]][coord[1]-1]==0:
+        coord3=[coord[0],coord[1]-1]
+        list_coor.append(coord3)
+    if coord[1]<len(board)-1 and board[coord[0]][coord[1]+1]==0:
+        coord4=[coord[0],coord[1]+1]
+        list_coor.append(coord4)
+    if len(list_coor)==0:return
+    x=list_coor[0]
+    for x in list_coor:        
+        for y in x:
+           if y < 0:               
+               del x[y]
+        if len(x)%2==1:           
+                list_coor.remove(x)
+
+    #print( "liste de base : {}".format(list_coor))            
+    recursive(list_coor,board,player,completed_liste)
+    #print("case a remplir:{}".format(completed_liste))
+    
+    tab=clean_tab(completed_liste)
+    board=complete_board(tab,board,player)    
+    #print(board)
+
+
+def recursive(liste,board,player,full_liste):
+    
+    for elem in liste:
+        temp_liste=[elem]
+        i=0
+        while i<len(temp_liste):
+            val=temp_liste[i]
+            #longueurListe=len(temp_liste)           
+            temp_liste=free_boxes(val,board,player,temp_liste)
+            i=i+1            
+        full_liste.append(temp_liste)    
+    return full_liste  
+
+
+    
+def free_boxes(coord,board,player,temp_liste):   
+    
+    if coord[0]>0 and board[coord[0]-1][coord[1]]==0:
+        coord1=[coord[0]-1,coord[1]]
+        if coord1 not in temp_liste:
+            temp_liste.append(coord1)
+    else: 
+        if coord[0]>0 and board[coord[0]-1][coord[1]]!=player:
+            temp_liste=[]
+            return temp_liste
+    if coord[0]<len(board)-1 and board[coord[0]+1][coord[1]]==0:
+        coord2=[coord[0]+1,coord[1]]
+        if coord2 not in temp_liste:
+            temp_liste.append(coord2)
+    else: 
+        if coord[0]<len(board)-1 and board[coord[0]+1][coord[1]]!=player:
+            temp_liste=[]
+            return temp_liste
+    if coord[1]>0 and board[coord[0]][coord[1]-1]==0:
+        coord3=[coord[0],coord[1]-1]
+        if coord[1]>0 and coord3 not in temp_liste:
+            temp_liste.append(coord3)
+    else: 
+        if coord[1]>0 and board[coord[0]][coord[1]-1]!=player:
+            temp_liste=[]
+            return temp_liste
+    if coord[1]<len(board)-1 and board[coord[0]][coord[1]+1]==0:
+        coord4=[coord[0],coord[1]+1]
+        if coord4 not in temp_liste:
+            temp_liste.append(coord4)
+    else: 
+        if coord[1]<len(board)-1 and board[coord[0]][coord[1]+1]!=player:
+            temp_liste=[]
+            return temp_liste    
+    return temp_liste
+
+def clean_tab(list_):
+    tab=[]
+    for elem in list_:
+        for e in elem:
+            if e not in tab:
+                tab.append(e)
+    return tab
+
+def complete_board(tab,board,player):
+    for elem in tab:
+        board[elem[0]][elem[1]]=player
+    return board
