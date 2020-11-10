@@ -31,10 +31,15 @@ async function main(movement) {
     document.getElementById("errors").textContent= "You cannot go on an enemy cell, try another move";
   }
   printPlayerToPlay(response.players, curr_player);
-  console.log(response.winner)
   if (response.winner != undefined){
-    document.getElementById("wrapper").textContent= "";
-    document.getElementById("player_to_play").textContent= "End of the game, the winner is: "+response.winner;
+    if(response.winner.tie){
+      document.getElementById("wrapper").textContent= "";
+      document.getElementById("player_to_play").textContent= "It's a tie with an amount of "+response.winner.nb_cell+" cells";
+    }
+    else{
+      document.getElementById("wrapper").textContent= "";
+      document.getElementById("player_to_play").textContent= "End of the game, the winner is: "+response.winner.name+" with an amount of "+response.winner.nb_cell+" cells";
+    }
   }
 }
 

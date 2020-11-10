@@ -95,7 +95,18 @@ def define_winner(board):
         for cell in line:
             stats = count_elements(stats, cell)
 
-    return max(stats, key=stats.get)
+    max = -1
+    kmax = -1
+    tie = False
+    for key,element in stats.items():
+        if max < element:
+            kmax = key
+            max = element
+            tie = False
+        elif max == element:
+            tie = True
+    return (kmax, max, tie)
+
 
 def complete_boxes(board,player,coord):
     list_coor=[]

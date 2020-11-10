@@ -83,8 +83,10 @@ def apply_move(request) :
             #Il ne peut y avoir qu'un seul vainqueur...
             print("End of the game")
             game_state = build_game_state(game_state_data, game_players, curr_player, 0)
-            winner_id = define_winner(game_state.get("board"))
-            game_state["winner"] =  game_players[winner_id-1].user.username
+            winner_id, nb_cell_winner, tie = define_winner(game_state.get("board"))
+
+            data_winner = {"name": game_players[winner_id-1].user.username, "nb_cell": nb_cell_winner, "tie":tie}
+            game_state["winner"] =  data_winner
         else:
             curr_player = change_player(game_players, p_player)
             game_state = build_game_state(game_state_data, game_players, curr_player, 0)
