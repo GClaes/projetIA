@@ -76,12 +76,7 @@ def apply_move(request) :
         print(e.message)
         game_state = build_game_state(game_state_data, game_players, curr_player, 2)
     else:
-        endgame = []
-        for line in game_state_data.board:
-            endgame.append(line.count(0) == 0)
-        if all(endgame):
-            #Il ne peut y avoir qu'un seul vainqueur...
-            print("End of the game")
+        if end_of_game(game_state_data.board):
             game_state = build_game_state(game_state_data, game_players, curr_player, 0)
             winner_id, nb_cell_winner, tie = define_winner(game_state.get("board"))
 
@@ -92,12 +87,6 @@ def apply_move(request) :
             game_state = build_game_state(game_state_data, game_players, curr_player, 0)
 
     game_state_data.current_player = game_state.get("current_player")
-
-
-    
-
-
-
 
     #Persister les données
     save_data(game_state_data)

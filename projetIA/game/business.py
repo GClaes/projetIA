@@ -107,6 +107,13 @@ def define_winner(board):
             tie = True
     return (kmax, max, tie)
 
+def end_of_game(board):
+    endgame = []
+    for line in board:
+        endgame.append(line.count(0) == 0)
+    return all(endgame)
+
+
 
 def complete_boxes(board,player,coord):
     list_coor=[]
