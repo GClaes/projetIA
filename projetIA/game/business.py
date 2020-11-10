@@ -117,45 +117,44 @@ def end_of_game(board):
 
 def complete_boxes(board,player,coord):
     list_coor=[]
-    completed_liste=[]
-    if coord[0]>1 and board[coord[0]-1][coord[1]]==0:
+    completed_list=[]
+    if coord[0]>0 and board[coord[0]-1][coord[1]]==0:
         coord1=[coord[0]-1,coord[1]]
         list_coor.append(coord1)       
     if coord[0]<len(board)-1 and board[coord[0]+1][coord[1]]==0:
         coord2=[coord[0]+1,coord[1]]
         list_coor.append(coord2)
-    if coord[1]>1 and board[coord[0]][coord[1]-1]==0:
+    if coord[1]>0 and board[coord[0]][coord[1]-1]==0:
         coord3=[coord[0],coord[1]-1]
         list_coor.append(coord3)
     if coord[1]<len(board)-1 and board[coord[0]][coord[1]+1]==0:
         coord4=[coord[0],coord[1]+1]
         list_coor.append(coord4)
-    if len(list_coor)==0:return
-    x=list_coor[0]
-    for x in list_coor:        
-        for y in x:
-           if y < 0:               
-               del x[y]
-        if len(x)%2==1:           
-                list_coor.remove(x)
+    if len(list_coor)>0:
+        x=list_coor[0]
+        for x in list_coor:        
+            for y in x:
+                if y < 0:               
+                    del x[y]
+            if len(x)%2==1:           
+                    list_coor.remove(x)
 
     #print( "liste de base : {}".format(list_coor))            
-    recursive(list_coor,board,player,completed_liste)
-    #print("case a remplir:{}".format(completed_liste))
+    list_of_boxes_to_fill(list_coor,board,player,completed_list)
+    #print("case a remplir:{}".format(completed_list))
     
-    tab=clean_tab(completed_liste)
+    tab=clean_tab(completed_list)
     board=complete_board(tab,board,player)    
-    #print(board)
+    
 
 
-def recursive(liste,board,player,full_liste):
+def list_of_boxes_to_fill(liste,board,player,full_liste):
     
     for elem in liste:
         temp_liste=[elem]
         i=0
         while i<len(temp_liste):
-            val=temp_liste[i]
-            #longueurListe=len(temp_liste)           
+            val=temp_liste[i]                       
             temp_liste=free_boxes(val,board,player,temp_liste)
             i=i+1            
         full_liste.append(temp_liste)    
