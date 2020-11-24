@@ -58,13 +58,8 @@ def apply_move(request) :
     game_state_data.board = string_to_list(game_state_data.board)
     game_players = get_all_player_from_gamestate(game_state_data)
     game_players = listing_game_players(game_players)
-
-    #Changer
-    game_player1 = game_players[0]
-    game_player2 = game_players[1]
-    #
     
-    #Changer le joueur qui joue
+    #Construire le game_state
     indice = index_player(int(p_player), game_players)
     curr_player = p_player
     try:
@@ -90,8 +85,8 @@ def apply_move(request) :
 
     #Persister les données
     save_data(game_state_data)
-    save_data(game_player1)
-    save_data(game_player2)
+    for game_player in game_players:
+        save_data(game_player)
 
 
 

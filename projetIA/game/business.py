@@ -1,24 +1,25 @@
 import ast
 from game.exceptions import *
+from functools import reduce
 
 def change_player(players,index_player):
-    print(index_player)
     index_player = int(index_player)
     return 0 if index_player == len(players)-1 else index_player+1
 
 
 def index_player(id_player, players):
-    for player in players:
-        if player.auto_increment_id == id_player:
-            return players.index(player)
-    return None
+    return players.index(reduce(lambda a, b: a if a.auto_increment_id == id_player else b, players))
+
     
 def calculate_position(player_pos, movement):
     position =  [player_pos[0]+movement[0], player_pos[1]+movement[1]]
-    for pos in position:
-        if pos < 0 or pos > 7:
-            raise OufOfBoardError("Test", "OutOfBoardError has occured")
-    return position
+    if is_coord_valide(position):
+        return position
+    else:
+        raise OufOfBoardError("Test", "OutOfBoardError has occured")
+
+def is_coord_valide(coord):
+    return len(list(filter(lambda x: x >= 0 and x < 8 , coord))) == 2
 
 def update_board_content(board, player, num_player, previous_pos):
     position = player.pos
@@ -32,9 +33,7 @@ def string_to_list(s):
     return ast.literal_eval(s)
 
 def listing_game_players(game_players):
-    game_players = list(game_players)
-    game_players = listing_player_pos(game_players)
-    return game_players
+    return listing_player_pos(list(game_players))
 
 def listing_player_pos(players):
     return [convert_pos(p) for p in players]
@@ -43,10 +42,9 @@ def convert_pos(player):
     player.pos = string_to_list(player.pos)
     return player
 
+
 def build_game_state(game_state_data, players, curr_player, code_error):
-
     players = build_players_entities(players)
-
     game_state = {
         "game_id" : game_state_data.auto_increment_id,
         "board" : game_state_data.board,
@@ -54,7 +52,6 @@ def build_game_state(game_state_data, players, curr_player, code_error):
         "current_player" : curr_player,
         "code" : code_error, 
     }
-
     return game_state
 
 def build_players_entities(players):
@@ -67,7 +64,6 @@ def build_players_entities(players):
             "position" : player.pos
         }
         players_obj.append(dic)
-
     return players_obj
 
 def move_pos(player, movement, game_state, players):
@@ -78,9 +74,9 @@ def move_pos(player, movement, game_state, players):
     return game_state
 
 def search_player_by_id(players, id):
-    for player in players:
-        if player.auto_increment_id == id:
-            return player.user.username
+    return reduce(lambda a, b: a.user.username if a.auto_increment_id == id else b, players)
+
+
 
 def count_elements(stats, element):
     if(stats.get(element,0)==0):
@@ -94,7 +90,6 @@ def define_winner(board):
     for line in board:
         for cell in line:
             stats = count_elements(stats, cell)
-
     max = -1
     kmax = -1
     tie = False
@@ -108,10 +103,7 @@ def define_winner(board):
     return (kmax, max, tie)
 
 def end_of_game(board):
-    endgame = []
-    for line in board:
-        endgame.append(line.count(0) == 0)
-    return all(endgame)
+    return all([line.count(0)==0 for line in board])
 
 
 
@@ -149,7 +141,6 @@ def complete_boxes(board,player,coord):
 
 
 def list_of_boxes_to_fill(liste,board,player,full_liste):
-    
     for elem in liste:
         temp_liste=[elem]
         i=0
@@ -199,14 +190,9 @@ def free_boxes(coord,board,player,temp_liste):
     return temp_liste
 
 def clean_tab(list_):
-    tab=[]
-    for elem in list_:
-        for e in elem:
-            if e not in tab:
-                tab.append(e)
-    return tab
+    return list([element for e in list_ for element in e])
 
 def complete_board(tab,board,player):
-    for elem in tab:
-        board[elem[0]][elem[1]]=player
+    for coord in tab:
+        board[coord[0]][coord[1]]=player
     return board
