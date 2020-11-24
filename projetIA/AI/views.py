@@ -63,6 +63,8 @@ def register_board(board,position):
     state = State(board = board, position = position,q_table = [0,0,0,0], grid_point_db = grid_point)
     state.save()
     return state
+
+
 def update_q_table(searched_board, searched_position,direction,recompense):
     board_db = verify_board(searched_board,searched_position)
     directionp1 = move(0,board_db.q_table,board_db.position)

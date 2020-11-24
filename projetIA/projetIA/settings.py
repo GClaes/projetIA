@@ -34,6 +34,7 @@ ALLOWED_HOSTS = []
 INSTALLED_APPS = [
     'connection.apps.ConnectionConfig',
     'game.apps.GameConfig',
+    'AI.apps.AiConfig',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',

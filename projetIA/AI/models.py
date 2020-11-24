@@ -1,10 +1,14 @@
 from django.db import models
+from connection.models import User
 
 # Create your models here.
-class AI(models.Model):
-    ai_name = models.CharField(max_length=25,primary_key=True)
+class AI(User):
+    id = models.AutoField(primary_key = True)   
     nb_games = models.IntegerField()
     epsilon = models.FloatField()
+
+    manager = models.Manager()
+
 
 
 class State(models.Model):

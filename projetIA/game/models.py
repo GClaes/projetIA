@@ -14,6 +14,8 @@ class Game_Player(models.Model):
     user=models.ForeignKey(User,on_delete=models.CASCADE)
     game_state=models.ForeignKey(Game_State,on_delete=models.CASCADE)
     pos=models.CharField(max_length=5)
+    is_ai = models.BooleanField(default=False)
+    
     manager = models.Manager()
    
 

@@ -15,6 +15,7 @@ window.onload = function() {
 }
 async function main(movement) {
   const response = await jsonRPC("/game/move", {game_id: game_id, player_id: curr_player, move: movement});
+  console.log(response)
   let pos = [];
   for(player of response.players){
     pos[pos.length] = player.position;

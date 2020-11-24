@@ -2,6 +2,7 @@ from django.shortcuts import render
 from django.http import HttpResponse
 from django import forms
 from connection.models import User, User_data
+from AI.models import AI
 
 class ConnectionForm (forms.Form):
     username = forms.CharField(label="Username")
@@ -42,9 +43,22 @@ class SignupForm (forms.Form):
         #Rechercher si username existant
         try:
             user = User.manager.get(username = c_username)
-        except User.DoesNotExist: #Aucune idée de pourquoi c'est souligné en rouge alors que c'est bon ?
+        except User.DoesNotExist:
             return cd
         raise forms.ValidationError("User does already exist")
+
+class AIForm(forms.Form):
+    ai_name = forms.CharField(label="AI Name")
+    epsilon = forms.CharField(label="Epsilon")
+
+    def clean(self):
+        cd= self.cleaned_data
+        c_ai_name = cd.get("ai_name")
+        try:
+            ai = AI.manager.get(username = c_ai_name)
+        except AI.DoesNotExist:
+            return cd
+        raise forms.ValidationError("AI with this name does already exist")
         
 
 
@@ -89,3 +103,22 @@ def signup(request):
             return HttpResponse("You are correctly signed up "+user.username+"//"+user.user_data.password)
 
         return render(request, "connection/signup.html", { "form": form })
+
+def signup_ai(request):
+    if request.method == "GET":
+        form = AIForm()
+        return render(request, "connection/signup_ai.html", {"form": form})
+    if request.method == "POST":
+        form = AIForm(request.POST)
+        if form.is_valid():
+            c_ai_name = form.cleaned_data.get("ai_name")
+            c_epsilon = form.cleaned_data.get("epsilon")
+            ai = AI(username = c_ai_name, epsilon= c_epsilon, nb_games=0, user_data = None )
+            ai.save()
+
+            ai = AI.manager.get(username = c_ai_name)
+
+            return HttpResponse("You are correctly signed up "+ai.username)
+
+        return render(request, "connection/signup_ai.html", {"form": form})
+

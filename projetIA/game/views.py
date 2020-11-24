@@ -9,12 +9,15 @@ import ast
 from game.business import *
 from game.services import *
 from game.exceptions import *
+from AI.models import AI
 
  
 
 class NewGameForm(forms.Form):
     player1 = forms.CharField(label="Player 1")
+    is_ai1 = forms.BooleanField(label="Is player 1 an AI", required=False)
     player2 = forms.CharField(label="Player 2")
+    is_ai2 = forms.BooleanField(label="Is player 2 an AI", required=False)
 
 
 def index(request):
@@ -27,25 +30,42 @@ def index(request):
         if form.is_valid():
             #[[1,0,1,1,1,1,1,1],[1,1,1,1,1,1,1,1],[1,1,1,1,1,1,1,1],[1,1,1,1,1,1,1,1],[1,1,1,1,1,1,1,1],[1,1,1,1,1,1,1,1],[1,1,1,1,1,1,1,1],[1,1,1,1,1,1,1,2]]
             #[[1,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,2]]
-            board = [[1,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,2]]
+            #[[1,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,2]]
+            board = [[1,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,2]]
             game_state_data = Game_State(current_player=1, board=board)
             game_state_data.save()
 
             username1 = form.cleaned_data.get("player1")
+            game_player1 = get_game_player(username1, form.cleaned_data.get("is_ai1"), game_state_data, [0,0] )
+
             username2 = form.cleaned_data.get("player2")
-            u1 = User.manager.get(username = username1)
-            u2 = User.manager.get(username = username2)
-            game_player1 = Game_Player(user=u1, game_state=game_state_data, pos=[0,0])
-            game_player1.save()
-            game_player2 = Game_Player(user=u2, game_state=game_state_data, pos=[7,7])
-            game_player2.save()
+            game_player2 = get_game_player(username2, form.cleaned_data.get("is_ai2"), game_state_data, [3,3])
 
+
+            game_state = build_game_state(game_state_data, [game_player1, game_player2], game_player1.auto_increment_id,0)  
+
+            if form.cleaned_data.get("is_ai1"):
+                game_state["AI_1"]= 1
+            if form.cleaned_data.get("is_ai2"):
+                game_state["AI_2"]= 1
             
-            game_state = build_game_state(game_state_data, [game_player1, game_player2], game_player1.auto_increment_id,0)
-
             return render(request, 'game/new_game.html', game_state)
 
         return HttpResponse("KO")
+
+
+def get_game_player(username, is_ai, game_state_data, pos):
+    u = User.manager.get(username = username)
+    game_player = Game_Player(user=u, game_state=game_state_data, pos=pos)
+    if is_ai:
+        game_player.is_ai = True
+    else:
+        game_player.is_ai = False
+    game_player.save()
+
+    print(game_player.is_ai)
+    return game_player
+
 
 def apply_move(request) :
     rcontent = json.loads(request.body.decode())
@@ -58,17 +78,17 @@ def apply_move(request) :
     game_state_data.board = string_to_list(game_state_data.board)
     game_players = get_all_player_from_gamestate(game_state_data)
     game_players = listing_game_players(game_players)
+
     
     #Construire le game_state
     indice = index_player(int(p_player), game_players)
     curr_player = p_player
     try:
+        #COndition is_ai
         game_state_data = move_pos(game_players[indice], movement, game_state_data, game_players)
     except OufOfBoardError as e:
-        print(e.message)
         game_state = build_game_state(game_state_data, game_players, curr_player, 1)
     except NotEmptyCellError as e:
-        print(e.message)
         game_state = build_game_state(game_state_data, game_players, curr_player, 2)
     else:
         if end_of_game(game_state_data.board):
@@ -87,7 +107,6 @@ def apply_move(request) :
     save_data(game_state_data)
     for game_player in game_players:
         save_data(game_player)
-
 
 
     return JsonResponse(game_state)
