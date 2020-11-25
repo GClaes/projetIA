@@ -1,24 +1,29 @@
 from django.shortcuts import render
 from game import *
 from State.models import State
+from AI.models import AI
 import random
 from random import randint
 
 # Create your views here.
-def play(board,pos):
+def play_ai(board,pos,ai):
     #recherche/creation du board
-    board_db = verify_board(board,pos)
+    board_db = verify_board(board,pos,ai)
     #calcul epsilon
-    eps = epsilon_greedy()
+    eps = epsilon_greedy(10,ai)
     #deplacement(renvoie le deplacement dans Game)
     return move(eps,board_db.q_table,board_db.position)
 
 
-def epsilon_greedy(E, i_partie, rapidite):
+def epsilon_greedy(rapidite,ai): 
+    ai=AI.manager.get(id=ai)
+    E=ai.epsilon
+    i_partie=ai.nb_games
     if i_partie % rapidite == 0:
         E = (E /100) * 95
     if E < 5: return 5
-    
+    ai.epsilon=E
+    ai.save()
     return E
 
 '''def eps_calc():
@@ -51,25 +56,27 @@ def move(eps,q_table,position):
     
     return direction
 
-def verify_board(searched_board,searched_position):
+def verify_board(searched_board,searched_position,ai):
 
-    board_db = State.manager.get(board = searched_board, position = searched_position)
+    board_db = State.manager.get(board = searched_board, position = searched_position,ai_id=ai)
     if board_db == None:
-        board_db = register_board(searched_board,searched_position)
+        board_db = register_board(searched_board,searched_position,ai)
     return board_db
 
-def register_board(board,position):
+def register_board(board,position,ai):
     grid_point = transform_board(board)
-    state = State(board = board, position = position,q_table = [0,0,0,0], grid_point_db = grid_point)
+    state = State(board = board, position = position,q_table = [0,0,0,0], grid_point_db = grid_point,ai_id = ai)
     state.save()
     return state
-
-
-def update_q_table(searched_board, searched_position,direction,recompense):
-    board_db = verify_board(searched_board,searched_position)
+def save_move(searched_board, searched_position,direction,ai):
+    board_db = verify_board(searched_board,searched_position,ai)
+    recompense=board_db.grid_point_db[searched_position[0]][searched_position[1]]
     directionp1 = move(0,board_db.q_table,board_db.position)
     board_db.q_table[direction] = board_db.q_table[direction] + 0.1*(recompense + 0.9*board_db.q_table[directionp1]- board_db.q_table[direction])
     board_db.save()
+    ai=AI.manager.get(id=ai)
+    ai.nb_games+=1
+    ai.save()
 
 def transform_board(board):
     #pourquoi le board est en charfield dans la db ??

@@ -24,6 +24,140 @@ h3{
     background: gray;
     padding: 1px;
 }
+.couleur3{
+    height: 50px;
+    width: 50px;
+    background: gray;
+    padding: 1px;
+}
+
+.blue{
+    height: 50px;
+    width: 50px;
+    background: blue;
+    padding: 1px;
+}
+.darkblue{
+    height: 50px;
+    width: 50px;
+    background: darkBlue;
+    padding: 1px;
+}
+
+.cyan{
+    height: 50px;
+    width: 50px;
+    background: cyan;
+    padding: 1px;
+}
+
+.darkcyan{
+    height: 50px;
+    width: 50px;
+    background: darkCyan;
+    padding: 1px;
+}
+
+.green{
+    height: 50px;
+    width: 50px;
+    background: green;
+    padding: 1px;
+}
+
+.darkgreen{
+    height: 50px;
+    width: 50px;
+    background: darkGreen;
+    padding: 1px;
+}
+
+.yellow{
+    height: 50px;
+    width: 50px;
+    background: yellow;
+    padding: 1px;
+}
+
+.orange{
+    height: 50px;
+    width: 50px;
+    background: orange;
+    padding: 1px;
+}
+
+.darkorange{
+    height: 50px;
+    width: 50px;
+    background: darkOrange;
+    padding: 1px;
+}
+
+.red{
+    height: 50px;
+    width: 50px;
+    background: red;
+    padding: 1px;
+}
+
+.darkred{
+    height: 50px;
+    width: 50px;
+    background: darkred;
+    padding: 1px;
+}
+
+.purple{
+    height: 50px;
+    width: 50px;
+    background: purple;
+    padding: 1px;
+}
+
+.black{
+    height: 50px;
+    width: 50px;
+    background: black;
+    padding: 1px;
+}
+
+.salmon{
+    height: 50px;
+    width: 50px;
+    background: salmon;
+    padding: 1px;
+}
+.pink{
+    height: 50px;
+    width: 50px;
+    background: pink;
+    padding: 1px;
+}
+.coral{
+    height: 50px;
+    width: 50px;
+    background: coral;
+    padding: 1px;
+}
+.gold{
+    height: 50px;
+    width: 50px;
+    background: gold;
+    padding: 1px;
+}
+.darkkhaki{
+    height: 50px;
+    width: 50px;
+    background: darkkhaki;
+    padding: 1px;
+}
+.orchid{
+    height: 50px;
+    width: 50px;
+    background: orchid;
+    padding: 1px;
+}
+
 body{
     background-image: url("./pictures/background.png");
     background-repeat: no-repeat;

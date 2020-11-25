@@ -30,12 +30,56 @@ class SignupForm (forms.Form):
     password = forms.CharField(label="Password", widget=forms.PasswordInput())
     confirm_password = forms.CharField(label="Confirm Password", widget=forms.PasswordInput())
 
+    COLOR_CHOICES = [
+            ('blue', 'blue'),
+            ('darkBlue', 'darkBlue'),
+            ('cyan', 'cyan'),
+            ('darkCyan', 'darkCyan'),
+            ('green', 'green'),
+            ('darkGreen', 'darkGreen'),
+            ('yellow', 'yellow'),
+            ('orange', 'orange'),
+            ('darkOrange', 'darkOrange'),
+            ('red', 'red'),
+            ('darkRed', 'darkRed'),
+            ('purple', 'purple'),
+            ('black', 'black'),
+        ]
+
+    fav_color1 = forms.MultipleChoiceField(
+        label = 'Colors 1',
+        required=False,
+        choices= COLOR_CHOICES,
+    )
+    fav_color2 = forms.MultipleChoiceField(
+        label = 'Colors 2',
+        required=False,
+        choices= COLOR_CHOICES,
+    )
+
+
     def clean (self):
         cd=self.cleaned_data
 
         c_username = cd.get("username")
         password = cd.get("password")
         cpassword = cd.get("confirm_password")
+
+        color1 = cd.get("fav_color1")
+        if len(color1) > 1:
+            raise forms.ValidationError("Choose only one color for Color 1")
+        if len(color1) < 1:
+            raise forms.ValidationError("Choose one color for Color 1")
+
+        color2 = cd.get("fav_color2")
+        if len(color2) > 1:
+            raise forms.ValidationError("Choose only one color for Color 2")
+        if len(color2) < 1:
+            raise forms.ValidationError("Choose one color for Color 2")
+        
+        colors = []
+        colors.append(color1[0])
+        colors.append(color2[0])
 
         if password != cpassword:
             raise forms.ValidationError("Passwords did not match")
@@ -51,9 +95,55 @@ class AIForm(forms.Form):
     ai_name = forms.CharField(label="AI Name")
     epsilon = forms.CharField(label="Epsilon")
 
+    COLOR_CHOICES = [
+            ('blue', 'blue'),
+            ('darkBlue', 'darkBlue'),
+            ('cyan', 'cyan'),
+            ('darkCyan', 'darkCyan'),
+            ('green', 'green'),
+            ('darkGreen', 'darkGreen'),
+            ('yellow', 'yellow'),
+            ('orange', 'orange'),
+            ('darkOrange', 'darkOrange'),
+            ('red', 'red'),
+            ('darkRed', 'darkRed'),
+            ('purple', 'purple'),
+            ('black', 'black'),
+        ]   
+
+    fav_color1 = forms.MultipleChoiceField(
+        label = 'Colors 1',
+        required=False,
+        choices= COLOR_CHOICES,
+    )
+    fav_color2 = forms.MultipleChoiceField(
+        label = 'Colors 2',
+        required=False,
+        choices= COLOR_CHOICES,
+    )
+
+
+
     def clean(self):
         cd= self.cleaned_data
         c_ai_name = cd.get("ai_name")
+
+        color1 = cd.get("fav_color1")
+        if len(color1) > 1:
+            raise forms.ValidationError("Choose only one color for Color 1")
+        if len(color1) < 1:
+            raise forms.ValidationError("Choose one color for Color 1")
+
+        color2 = cd.get("fav_color2")
+        if len(color2) > 1:
+            raise forms.ValidationError("Choose only one color for Color 2")
+        if len(color2) < 1:
+            raise forms.ValidationError("Choose one color for Color 2")
+        
+        colors = []
+        colors.append(color1[0])
+        colors.append(color2[0])
+
         try:
             ai = AI.manager.get(username = c_ai_name)
         except AI.DoesNotExist:
@@ -92,15 +182,22 @@ def signup(request):
             #Enregister en base de données
             cd_username = form.cleaned_data.get("username") #Permet d'accéder aux champs
             cd_password = form.cleaned_data.get("password")
+
+            cd_colors = []
+            color1 = form.cleaned_data.get("fav_color1")
+            color2 = form.cleaned_data.get("fav_color2")
+            cd_colors.append(color1[0])
+            cd_colors.append(color2[0])
+
             ud = User_data(password=cd_password)
             ud.save()
-            u = User(username=cd_username, user_data = ud, color1="R", color2="B")
+            u = User(username=cd_username, user_data = ud, color1=cd_colors[0], color2=cd_colors[1])
             u.save()
 
 
             #Permet de vérifier que ça a bien enregistré et de récupérer le compte
             user = User.manager.get(username = cd_username)
-            return HttpResponse("You are correctly signed up "+user.username+"//"+user.user_data.password)
+            return HttpResponse("You are correctly signed up "+user.username+"//"+user.user_data.password+"//"+user.color1+"//"+user.color2)
 
         return render(request, "connection/signup.html", { "form": form })
 
@@ -113,7 +210,14 @@ def signup_ai(request):
         if form.is_valid():
             c_ai_name = form.cleaned_data.get("ai_name")
             c_epsilon = form.cleaned_data.get("epsilon")
-            ai = AI(username = c_ai_name, epsilon= c_epsilon, nb_games=0, user_data = None )
+
+            cd_colors = []
+            color1 = form.cleaned_data.get("fav_color1")
+            color2 = form.cleaned_data.get("fav_color2")
+            cd_colors.append(color1[0])
+            cd_colors.append(color2[0])
+
+            ai = AI(username = c_ai_name, epsilon= c_epsilon, nb_games=0, user_data = None, color1=cd_colors[0], color2=cd_colors[1])
             ai.save()
 
             ai = AI.manager.get(username = c_ai_name)

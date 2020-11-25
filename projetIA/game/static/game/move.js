@@ -58,10 +58,10 @@ function generateTable(table, data, pos) {
       let cell = row.insertCell();
 
       if(element[key] == 1){
-        cell.className = "couleur1"
+        cell.className = colors[0];
       }
       else if (element[key] == 2){
-        cell.className = "couleur2"
+        cell.className = colors[1];
       }
       else{
         cell.className="couleur3"

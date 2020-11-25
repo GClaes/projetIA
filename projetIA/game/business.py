@@ -60,12 +60,47 @@ def build_players_entities(players):
         dic = {
             "id":player.auto_increment_id,
             "name" : player.user.username,
-            "color" : player.user.color1,
+            "color" : player.color,
             "position" : player.pos
         }
         players_obj.append(dic)
     return players_obj
 
+def build_colors(users):
+
+    colors = []
+    for user in users:
+        temp = []
+        color1= user.color1
+        color2= user.color2
+        temp.append(color1)
+        temp.append(color2)
+        colors.append(temp)
+    colors = sort_colors(colors)
+    return colors
+
+
+def sort_colors(colors):
+    colorsReplace = ["salmon","pink","coral","gold","darkkhaki","orchid"] #a completer si + de 7 joueurs (longueur de colors replace >= nb joueurs-1)
+    tabColors = []
+    #print(colors[0][0])
+    tabColors.append(colors[0][0])
+    i = 1
+    j=0
+    while i < len(colors):
+        temp = colors[i][0]
+        if temp not in tabColors:
+            tabColors.append(temp)
+        else:
+            temp = colors[i][1]
+            if temp not in tabColors:
+                tabColors.append(temp)
+            else:
+                tabColors.append(colorsReplace[j])
+                j+=1
+        i+=1
+    return tabColors
+    
 def move_pos(player, movement, game_state, players):
     previous_pos = player.pos
     player.pos = calculate_position(player.pos, movement)

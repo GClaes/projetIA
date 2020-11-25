@@ -36,10 +36,14 @@ def index(request):
             game_state_data.save()
 
             username1 = form.cleaned_data.get("player1")
-            game_player1 = get_game_player(username1, form.cleaned_data.get("is_ai1"), game_state_data, [0,0] )
-
             username2 = form.cleaned_data.get("player2")
-            game_player2 = get_game_player(username2, form.cleaned_data.get("is_ai2"), game_state_data, [3,3])
+            
+            u1 = User.manager.get(username = username1)
+            u2 = User.manager.get(username = username2)
+            colors = build_colors([u1,u2])
+            
+            game_player1 = get_game_player(username1, form.cleaned_data.get("is_ai1"), game_state_data, [0,0],colors[0])
+            game_player2 = get_game_player(username2, form.cleaned_data.get("is_ai2"), game_state_data, [3,3],colors[1])
 
 
             game_state = build_game_state(game_state_data, [game_player1, game_player2], game_player1.auto_increment_id,0)  
@@ -54,9 +58,9 @@ def index(request):
         return HttpResponse("KO")
 
 
-def get_game_player(username, is_ai, game_state_data, pos):
+def get_game_player(username, is_ai, game_state_data, pos,col):
     u = User.manager.get(username = username)
-    game_player = Game_Player(user=u, game_state=game_state_data, pos=pos)
+    game_player = Game_Player(user=u, game_state=game_state_data, pos=pos , color = col)
     if is_ai:
         game_player.is_ai = True
     else:
@@ -85,6 +89,8 @@ def apply_move(request) :
     curr_player = p_player
     try:
         #COndition is_ai
+        if game_players[indice].is_ai:
+            movement=play_ai(game_state_data.board,game_state_data.pos,game_players[indice].user.username)
         game_state_data = move_pos(game_players[indice], movement, game_state_data, game_players)
     except OufOfBoardError as e:
         game_state = build_game_state(game_state_data, game_players, curr_player, 1)
