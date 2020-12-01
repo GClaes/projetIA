@@ -10,6 +10,7 @@ from game.business import *
 from game.services import *
 from game.exceptions import *
 from AI.models import AI
+from AI.views import *
 
  
 
@@ -77,6 +78,7 @@ def apply_move(request) :
     p_player = rcontent.get("player_id")
     game_id = rcontent.get("game_id")
 
+
     #Recupérer le game_state en DB
     game_state_data = get_gamestate_data(game_id)
     game_state_data.board = string_to_list(game_state_data.board)
@@ -90,7 +92,10 @@ def apply_move(request) :
     try:
         #COndition is_ai
         if game_players[indice].is_ai:
-            movement=play_ai(game_state_data.board,game_state_data.pos,game_players[indice].user.username)
+            ai = AI.manager.get(username=game_players[indice].user.username)
+
+            movement=play_ai(game_state_data.board,game_players[indice].pos,ai)
+            print(movement)
         game_state_data = move_pos(game_players[indice], movement, game_state_data, game_players)
     except OufOfBoardError as e:
         game_state = build_game_state(game_state_data, game_players, curr_player, 1)

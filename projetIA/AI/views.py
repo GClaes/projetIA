@@ -1,14 +1,16 @@
 from django.shortcuts import render
 from game import *
-from State.models import State
-from AI.models import AI
+from AI.models import *
 import random
 from random import randint
 
 # Create your views here.
 def play_ai(board,pos,ai):
     #recherche/creation du board
+    print("test")
+
     board_db = verify_board(board,pos,ai)
+    print("test")
     #calcul epsilon
     eps = epsilon_greedy(10,ai)
     #deplacement(renvoie le deplacement dans Game)
@@ -16,7 +18,6 @@ def play_ai(board,pos,ai):
 
 
 def epsilon_greedy(rapidite,ai): 
-    ai=AI.manager.get(id=ai)
     E=ai.epsilon
     i_partie=ai.nb_games
     if i_partie % rapidite == 0:
@@ -58,8 +59,9 @@ def move(eps,q_table,position):
 
 def verify_board(searched_board,searched_position,ai):
 
-    board_db = State.manager.get(board = searched_board, position = searched_position,ai_id=ai)
-    if board_db == None:
+    try:
+        board_db = State.manager.get(board = searched_board, position = searched_position,ai_id=ai.id)
+    except Exception as e:
         board_db = register_board(searched_board,searched_position,ai)
     return board_db
 
@@ -68,13 +70,13 @@ def register_board(board,position,ai):
     state = State(board = board, position = position,q_table = [0,0,0,0], grid_point_db = grid_point,ai_id = ai)
     state.save()
     return state
+
 def save_move(searched_board, searched_position,direction,ai):
     board_db = verify_board(searched_board,searched_position,ai)
     recompense=board_db.grid_point_db[searched_position[0]][searched_position[1]]
     directionp1 = move(0,board_db.q_table,board_db.position)
     board_db.q_table[direction] = board_db.q_table[direction] + 0.1*(recompense + 0.9*board_db.q_table[directionp1]- board_db.q_table[direction])
     board_db.save()
-    ai=AI.manager.get(id=ai)
     ai.nb_games+=1
     ai.save()
 
