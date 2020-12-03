@@ -16,6 +16,7 @@ class Game_Player(models.Model):
     pos=models.CharField(max_length=5)
     color = models.CharField(max_length=146)
     is_ai = models.BooleanField(default=False)
+    #AJOUTER FK VERS STATE
     
     manager = models.Manager()
    
