@@ -6,7 +6,6 @@ class AI(User):
     id = models.AutoField(primary_key = True)   
     nb_games = models.IntegerField()
     epsilon = models.FloatField()
-
     manager = models.Manager()
 
 
@@ -14,9 +13,9 @@ class AI(User):
 class State(models.Model):
     id = models.AutoField(primary_key = True)
     board=models.CharField(max_length=146)
-    grid_point_db = models.CharField(max_length=146)
     position = models.CharField(max_length=2)
-    q_table = models.FloatField()
+    position2 = models.CharField(max_length=2)
+    q_table = models.CharField(max_length=100)
     ai_id=models.ForeignKey(AI,on_delete=models.CASCADE)
 
     manager = models.Manager()

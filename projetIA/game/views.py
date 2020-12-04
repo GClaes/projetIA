@@ -10,7 +10,7 @@ from game.business import *
 from game.services import *
 from game.exceptions import *
 from AI.models import AI
-from AI.views import *
+from AI.views import play_ai
 
  
 
@@ -73,8 +73,9 @@ def get_game_player(username, is_ai, game_state_data, pos,col):
 
 
 def apply_move(request) :
+
     rcontent = json.loads(request.body.decode())
-    movement = rcontent.get("move")
+    #movement = rcontent.get("move")
     p_player = rcontent.get("player_id")
     game_id = rcontent.get("game_id")
 
@@ -85,17 +86,27 @@ def apply_move(request) :
     game_players = get_all_player_from_gamestate(game_state_data)
     game_players = listing_game_players(game_players)
 
+   
+    
     
     #Construire le game_state
     indice = index_player(int(p_player), game_players)
     curr_player = p_player
     try:
-        #COndition is_ai
         if game_players[indice].is_ai:
+            
             ai = AI.manager.get(username=game_players[indice].user.username)
-
-            movement=play_ai(game_state_data.board,game_players[indice].pos,ai)
+            direction_board =play_ai(game_state_data.board,game_players[indice].pos,game_players[indice+1].pos,ai,game_players[indice])
+            movement = direction_board[0]
             print(movement)
+        else:
+            
+            movement = rcontent.get("move")
+            
+
+    
+        #COndition is_ai
+        
         game_state_data = move_pos(game_players[indice], movement, game_state_data, game_players)
     except OufOfBoardError as e:
         game_state = build_game_state(game_state_data, game_players, curr_player, 1)
@@ -115,6 +126,8 @@ def apply_move(request) :
     game_state_data.current_player = game_state.get("current_player")
 
     #Persister les données
+    if game_players[indice].is_ai:
+        game_players[indice].preview_state_ai = direction_board[1]
     save_data(game_state_data)
     for game_player in game_players:
         save_data(game_player)

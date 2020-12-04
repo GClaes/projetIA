@@ -1,5 +1,6 @@
 from django.db import models
 from connection.models import User
+from AI.models import State
 
 
 # Create your models here.
@@ -16,7 +17,7 @@ class Game_Player(models.Model):
     pos=models.CharField(max_length=5)
     color = models.CharField(max_length=146)
     is_ai = models.BooleanField(default=False)
-    
+    preview_state_ai=models.ForeignKey(State,on_delete=models.CASCADE,blank=True,null=True)
     manager = models.Manager()
    
 
