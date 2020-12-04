@@ -68,7 +68,6 @@ def get_game_player(username, is_ai, game_state_data, pos,col):
         game_player.is_ai = False
     game_player.save()
 
-    print(game_player.is_ai)
     return game_player
 
 
@@ -92,11 +91,12 @@ def apply_move(request) :
     #Construire le game_state
     indice = index_player(int(p_player), game_players)
     curr_player = p_player
+   
     try:
         if game_players[indice].is_ai:
             
             ai = AI.manager.get(username=game_players[indice].user.username)
-            direction_board =play_ai(game_state_data.board,game_players[indice].pos,game_players[indice+1].pos,ai,game_players[indice])
+            direction_board =play_ai(game_state_data.board,game_players[indice].pos,game_players[indice+1].pos,ai,game_players[indice],indice)
             movement = direction_board[0]
             print(movement)
         else:

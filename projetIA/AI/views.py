@@ -7,24 +7,23 @@ import random
 from random import randint
 
 # Create your views here.
-def play_ai(board_,pos1,pos2,ai,game_player):
+def play_ai(board_,pos1,pos2,ai,game_player,curr_player):
     board = board_
-    print(pos1)
     up = [-1,0]
     down = [1,0]
     right = [0,1]
     left=[0,-1]
     tab_direction=[up,down,right,left]
 
-    eps = epsilon_greedy(10,ai)
+    eps = epsilon_greedy(1,ai)
     board_db = verify_board(board,pos1,pos2,ai)
     direction = move(eps,board_db.q_table,board_db.position)
-    while not verify_direction(direction,board,pos1,game_player):
+    while not verify_direction(direction,board,pos1,curr_player):
         direction = move(eps,board_db.q_table,board_db.position)
     if game_player.preview_state_ai is not None:
         update_q_table(board,board_db,pos1,pos2,ai,game_player,direction)
     direction_board = [tab_direction[direction],board_db]
-    #print(direction)
+    
     return direction_board
 
 def epsilon_greedy(rapidite,ai): 
@@ -40,23 +39,32 @@ def epsilon_greedy(rapidite,ai):
 def move(eps,q_table,position):
     #attention aux murs (et a la mousse)
     #ajouter un 'convertisseur' pour la direction (0,1,2,3 = haut,bas,gauche,droite)
-    if qtable_is_null(q_table) == 0 or random.uniform(0, 1) < eps:
+    q_table=string_to_list(q_table)
+    
+    r=random.randint(0, 100)
+    print("r=",r)
+    print("epsilon= ",eps)
+    print("q_table=",q_table)
+    print("qtable is null=",qtable_is_null(q_table))
+    
+    if qtable_is_null(q_table) == 0 or r < eps:
         direction = randint(0, 3)
+        print("random")    
     else:
         direction = q_table.index(max(q_table))
-    
+        print("qtble= ",q_table)
+        print("exploitation")
     return direction
 
-def qtable_is_null(qtable):
-    q_table_list = string_to_list(qtable)
+def qtable_is_null(q_table):
     sum = 0
-    for i in q_table_list:
+    for i in q_table:
         sum+=i
-    return i
+    return sum
 
-def verify_direction(direction,board,pos1,game_player):
+def verify_direction(direction,board,pos1,curr_player):
+    
     pos=pos1
-
     up = [-1,0]
     down = [1,0]
     right = [0,1]
@@ -64,19 +72,25 @@ def verify_direction(direction,board,pos1,game_player):
     tab_direction=[up,down,right,left]
 
     move = tab_direction[direction]
-    pos[0]+=move[0]
-    pos[1]+=move[1]
-    if pos[0] < 0 or pos[0] > 3 or pos[1] < 0 or pos[1] > 3: #virer hardcoding
+    x=pos[0]+move[0]
+    y=pos[1]+move[1]
+    
+   
+    if x < 0 or x > 3 or y < 0 or y > 3: #virer hardcoding
         return False
     else:
-        if board[pos[0]][pos[1]] != game_player.game_state.current_player and board[pos[0]][pos[1]] != 0:
-            return False
-        else:
+        if board[x][y] ==curr_player+1 or board[x][y] == 0:
             return True
+        else:
+            return False
 
 def verify_board(searched_board,searched_position1,searched_position2,ai):
+    board=str(searched_board)
+    pos1=str(searched_position1)
+    pos2=str(searched_position2)
     try:
-        board_db = State.manager.get(board = searched_board, position = searched_position1,position2 = searched_position2,ai_id=ai.id)
+        board_db = State.manager.get(board = board, position = pos1,position2 = pos2,ai_id=ai.id)
+        print("state= " ,board_db)
     except Exception as e:
         board_db = register_board(searched_board,searched_position1,searched_position2,ai)
     return board_db
@@ -98,14 +112,18 @@ def update_q_table(board,board_db,pos1,pos2,ai,game_player,direction):
     #modif en fct de (fct dans business)
     #print(type(max_q))
     #print(type(old_q))
-    old_q[direction] = old_q[direction] + 0.1*(recompense+max_q-old_q[direction])
-    game_player.preview_state_ai.q_table = old_q
-
+    print('recompense= ',recompense)
+    old_q[direction] = old_q[direction] + 0.9*(recompense+max_q-old_q[direction])
+    state=game_player.preview_state_ai
+    print("old_q",old_q)
+    state.q_table=old_q
+    state.save()
+    game_player.preview_state_ai.q_table=old_q
+    game_player.save()
     
     #mettre le state actuel dans le gameplayer
     #game_player.preview_state_ai = ai.
     board_db.save()
-    ai.nb_games+=1
     ai.save()
 
 def count_boxes(board,num_player):
@@ -143,10 +161,8 @@ def best_reward_and_position(pos,preview_board,num_player,old_pos):
 
     return best_points,best_position
 
-def calculate_reward(board,ai_position,opp_position,gameplayer):
-    return 1
-
-    '''preview_state = gameplayer.preview_state_ai
+def calculate_reward(board,ai_position,opp_position,gameplayer): 
+    preview_state = gameplayer.preview_state_ai
     pos_ai = string_to_list( preview_state.position)
     pos = opp_position
     preview_board = string_to_list(preview_state.board)
@@ -164,7 +180,7 @@ def calculate_reward(board,ai_position,opp_position,gameplayer):
         else:
             return 1
     else:
-        return count_cells(preview_board,board,num_player)'''
+        return count_cells(preview_board,board,num_player)
 
 
 def count_cells(old_board, new_board, num_player):
