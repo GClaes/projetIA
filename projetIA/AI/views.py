@@ -22,7 +22,6 @@ def play_ai(board,pos1,pos2,ai,game_player,curr_player):
     if game_player.preview_state_ai is not None:
         update_q_table(board,board_db,pos1,pos2,ai,game_player,direction)
     direction_board = [tab_direction[direction],board_db]
-    
     return direction_board
 
 def epsilon_greedy(rapidite,ai): 
@@ -41,18 +40,18 @@ def move(eps,q_table,position):
     q_table=string_to_list(q_table)
     
     r=random.randint(0, 100)
-    print("r=",r)
-    print("epsilon= ",eps)
-    print("q_table=",q_table)
-    print("qtable is null=",qtable_is_null(q_table))
+    #print("r=",r)
+    #print("epsilon= ",eps)
+    #print("q_table=",q_table)
+    #print("qtable is null=",qtable_is_null(q_table))
     
     if qtable_is_null(q_table) == 0 or r < eps:
         direction = randint(0, 3)
-        print("random")    
+        #print("random")    
     else:
         direction = q_table.index(max(q_table))
-        print("qtble= ",q_table)
-        print("exploitation")
+        #print("qtble= ",q_table)
+        #print("exploitation")
     return direction
 
 def qtable_is_null(q_table):
@@ -75,7 +74,7 @@ def verify_direction(direction,board,pos1,curr_player):
     y=pos[1]+move[1]
     
    
-    if x < 0 or x > 3 or y < 0 or y > 3: #virer hardcoding
+    if x < 0 or x > 7 or y < 0 or y > 7: #virer hardcoding
         return False
     else:
         if board[x][y] ==curr_player+1 or board[x][y] == 0:
@@ -89,7 +88,7 @@ def verify_board(searched_board,searched_position1,searched_position2,ai):
     pos2=str(searched_position2)
     try:
         board_db = State.manager.get(board = board, position = pos1,position2 = pos2,ai_id=ai.id)
-        print("state= " ,board_db)
+        #print("state= " ,board_db)
     except Exception as e:
         board_db = register_board(searched_board,searched_position1,searched_position2,ai)
     return board_db
@@ -111,10 +110,10 @@ def update_q_table(board,board_db,pos1,pos2,ai,game_player,direction):
     #modif en fct de (fct dans business)
     #print(type(max_q))
     #print(type(old_q))
-    print('recompense= ',recompense)
+    #print('recompense= ',recompense)
     old_q[direction] = old_q[direction] + 0.9*(recompense+max_q-old_q[direction])
     state=game_player.preview_state_ai
-    print("old_q",old_q)
+    #print("old_q",old_q)
     state.q_table=old_q
     state.save()
     game_player.preview_state_ai.q_table=old_q
@@ -162,10 +161,21 @@ def best_reward_and_position(pos,preview_board,num_player,old_pos):
 
 def calculate_reward(board,ai_position,opp_position,gameplayer): 
     preview_state = gameplayer.preview_state_ai
-    pos_ai = string_to_list( preview_state.position)
+    print("TEST",preview_state.position)
+    try:
+        pos_ai = string_to_list( preview_state.position)
+    except Exception as e:
+        pos_ai =preview_state.position
     pos = opp_position
-    preview_board = string_to_list(preview_state.board)
-    preview_opp_pos = string_to_list(preview_state.position2)
+    try:
+        preview_board = string_to_list(preview_state.board)
+    except Exception as e:
+        preview_board = preview_state.board
+
+    try:
+        preview_opp_pos = string_to_list(preview_state.position2)
+    except Exception as e:
+        preview_opp_pos = preview_state.position2
     num_opp = board[pos[0]][pos[1]]
     num_player = board[ai_position[0]][ai_position[1]]
     
