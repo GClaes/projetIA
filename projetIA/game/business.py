@@ -3,8 +3,13 @@ from game.exceptions import *
 from functools import reduce
 
 def change_player(players,index_player):
+    
     index_player = int(index_player)
-    return 0 if index_player == len(players)-1 else index_player+1
+    return players[0].auto_increment_id if index_player == len(players)-1 else players[index_player+1].auto_increment_id
+    
+
+
+    
 
 
 def index_player(id_player, players):
