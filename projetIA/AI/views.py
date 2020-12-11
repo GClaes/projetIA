@@ -7,8 +7,7 @@ import random
 from random import randint
 
 # Create your views here.
-def play_ai(board_,pos1,pos2,ai,game_player,curr_player):
-    board = board_
+def play_ai(board,pos1,pos2,ai,game_player,curr_player):
     up = [-1,0]
     down = [1,0]
     right = [0,1]

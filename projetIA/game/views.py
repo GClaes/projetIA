@@ -94,9 +94,12 @@ def apply_move(request) :
    
     try:
         if game_players[indice].is_ai:
-            
+            if indice == 1:
+                indice_oppo = 0
+            else:
+                indice_oppo = 1
             ai = AI.manager.get(username=game_players[indice].user.username)
-            direction_board =play_ai(game_state_data.board,game_players[indice].pos,game_players[indice+1].pos,ai,game_players[indice],indice)
+            direction_board = play_ai(game_state_data.board,game_players[indice].pos,game_players[indice_oppo].pos,ai,game_players[indice],indice)
             movement = direction_board[0]
             print(movement)
         else:
