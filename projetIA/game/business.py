@@ -1,16 +1,12 @@
 import ast
 from game.exceptions import *
 from functools import reduce
+from game.services import *
+from connection.models import *
 
 def change_player(players,index_player):
-    
     index_player = int(index_player)
     return players[0].auto_increment_id if index_player == len(players)-1 else players[index_player+1].auto_increment_id
-    
-
-
-    
-
 
 def index_player(id_player, players):
     return players.index(reduce(lambda a, b: a if a.auto_increment_id == id_player else b, players))
@@ -72,7 +68,6 @@ def build_players_entities(players):
     return players_obj
 
 def build_colors(users):
-
     colors = []
     for user in users:
         temp = []
@@ -236,3 +231,27 @@ def complete_board(tab,board,player):
     for coord in tab:
         board[coord[0]][coord[1]]=player
     return board
+
+def print_winner(game_state, game_player):
+    winner_id, nb_cell_winner, tie = define_winner(game_state.get("board"))
+    data_winner = {"name": game_player.user.username, "nb_cell": nb_cell_winner, "tie":tie}
+    game_player.user.nb_games_wins+=1
+    game_player.user.save()
+    game_state["winner"] =  data_winner
+
+    return game_state
+
+def is_current_player_ai(game_player):
+    return game_player.is_ai
+
+def save_game_turn(game_state_data, game_players):
+    save_data(game_state_data)
+    for game_player in game_players:
+        save_data(game_player)
+
+def get_game_player(username, is_ai, game_state_data, pos,col):
+    u = User.manager.get(username = username)
+    game_player = Game_Player(user=u, game_state=game_state_data, pos=pos , color = col)
+    game_player.is_ai = is_ai
+    game_player.save()
+    return game_player

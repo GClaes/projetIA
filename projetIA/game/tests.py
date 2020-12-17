@@ -1,5 +1,6 @@
 from django.test import TestCase
 from game.business import *
+from game.models import Game_Player
 
 # Create your tests here.
 
@@ -20,20 +21,24 @@ class IsCoordValideTest(TestCase):
 
         
 class ChangePlayerTest(TestCase):
-    players = ["J1", "J2"]
-    players_v2 = ["J1", "J2", "J3"]
+    p1 = Game_Player(auto_increment_id=1)
+    p2 = Game_Player(auto_increment_id=2)
+    p3 = Game_Player(auto_increment_id=3)
+
+    players = [p1,p2]
+    players_v2 = [p1,p2,p3]
     
     def test_change_player_1_to_2(self):
-        self.assertEqual(change_player(self.players, 0),1)
+        self.assertEqual(change_player(self.players, 0),2)
     
     def test_change_player_2_to_1(self):
-        self.assertEqual(change_player(self.players, 1),0)
+        self.assertEqual(change_player(self.players, 1),1)
 
     def test_change_player_2_to_3(self):
-        self.assertEqual(change_player(self.players_v2, 1),2)
+        self.assertEqual(change_player(self.players_v2, 1),3)
     
     def test_change_player_3_to_1(self):
-        self.assertEqual(change_player(self.players_v2, 2),0)
+        self.assertEqual(change_player(self.players_v2, 2),1)
 
 class EndOfGameTest(TestCase):
 

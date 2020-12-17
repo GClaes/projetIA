@@ -5,10 +5,10 @@ from game.models import *
 from game.business import *
 import random
 from random import randint
+from functools import reduce
 
-# Create your views here.
+
 def play_ai(board,pos1,pos2,ai,game_player,curr_player):
-    print("board debut IA",board)
     up = [-1,0]
     down = [1,0]
     right = [0,1]
@@ -20,7 +20,7 @@ def play_ai(board,pos1,pos2,ai,game_player,curr_player):
     direction = move(eps,board_db.q_table,board_db.position)
     while not verify_direction(direction,board,pos1,curr_player):
         direction = move(eps,board_db.q_table,board_db.position)
-    if game_player.preview_state_ai is not None:
+    if game_player.preview_state_ai:
         update_q_table(board,board_db,pos1,pos2,ai,game_player,direction)
     direction_board = [tab_direction[direction],board_db]
     return direction_board
@@ -36,107 +36,67 @@ def epsilon_greedy(ai):
     return E
 
 def move(eps,q_table,position):
-    #attention aux murs (et a la mousse)
-    #ajouter un 'convertisseur' pour la direction (0,1,2,3 = haut,bas,gauche,droite)
     q_table=string_to_list(q_table)
-    
     r=random.randint(0, 100)
-    #print("r=",r)
-    #print("epsilon= ",eps)
-    #print("q_table=",q_table)
-    #print("qtable is null=",qtable_is_null(q_table))
     
-    if qtable_is_null(q_table) == 0 or r < eps:
+    if qtable_count_value(q_table) == 0 or r < eps:
         direction = randint(0, 3)
-        #print("random")    
     else:
         direction = q_table.index(max(q_table))
-        #print("qtble= ",q_table)
-        #print("exploitation")
     return direction
 
-def qtable_is_null(q_table):
-    sum = 0
-    for i in q_table:
-        sum+=i
-    return sum
+def qtable_count_value(q_table):
+    return reduce(lambda x,y: x+y, q_table)
 
-def verify_direction(direction,board,pos1,curr_player):
-    
-    pos=pos1
+def verify_direction(direction,board,pos,curr_player):
     up = [-1,0]
     down = [1,0]
     right = [0,1]
     left=[0,-1]
     tab_direction=[up,down,right,left]
-
-    move = tab_direction[direction]
-    x=pos[0]+move[0]
-    y=pos[1]+move[1]
-    
+    x=pos[0]+tab_direction[direction][0]
+    y=pos[1]+tab_direction[direction][1]
    
     if x < 0 or x > 3 or y < 0 or y > 3: #virer hardcoding
         return False
     else:
-        if board[x][y] ==curr_player+1 or board[x][y] == 0:
-            return True
-        else:
-            return False
+        return board[x][y] ==curr_player+1 or board[x][y] == 0
 
 def verify_board(searched_board,searched_position1,searched_position2,ai):
-    #board=str(searched_board)
-    print("board en string",searched_board)
+    board=str(searched_board)
     pos1=str(searched_position1)
     pos2=str(searched_position2)
 
     try:
-        board_db = State.manager.get(board = searched_board, position = pos1,position2 = pos2,ai_id=ai)
+        board_db = State.manager.get(board = board, position = pos1,position2 = pos2,ai_id=ai)
         print("state connu = " ,board_db.board)
 
     except Exception as e:
-        print("new state",searched_board)
-        board_db = register_board(searched_board,searched_position1,searched_position2,ai)
+        board_db = register_board(board,pos1,pos2,ai)
+        print("-")
     return board_db
-#ICI
+
 def register_board(board,position,position2,ai):
     state = State(board = board, position = position,position2 = position2 ,q_table = "[0,0,0,0]",ai_id = ai)
     state.save()
     return state
 
 def update_q_table(board,board_db,pos1,pos2,ai,game_player,direction):
-    #board_db = verify_board(board,pos1,ai)
     old_q = string_to_list(game_player.preview_state_ai.q_table)
     q_table_list = string_to_list(board_db.q_table)
     max_q = max(q_table_list)
-    #a refaire
     recompense=calculate_reward(board,pos1,pos2,game_player)
-
-    #directionp1 = move(0,board_db.q_table,board_db.position)
-    #modif en fct de (fct dans business)
-    #print(type(max_q))
-    #print(type(old_q))
-    #print('recompense= ',recompense)
     old_q[direction] = old_q[direction] + ai.learning_rate*(recompense+max_q-old_q[direction])
     state=game_player.preview_state_ai
-    #print("old_q",old_q)
     state.q_table=old_q
     state.save()
     game_player.preview_state_ai.q_table=old_q
     game_player.save()
-    
-    #mettre le state actuel dans le gameplayer
-    #game_player.preview_state_ai = ai.
     board_db.save()
     ai.save()
 
 def count_boxes(board,num_player):
-    nb_cases = 0
-    for line in board:
-        for cell in line:
-            if cell == num_player:
-                nb_cases +=1
-    
-    return nb_cases
+    return reduce(lambda x,y: x+y, board).count(num_player)
 
 def best_reward_and_position(pos,preview_board,num_player,old_pos):
     
@@ -152,8 +112,6 @@ def best_reward_and_position(pos,preview_board,num_player,old_pos):
     for i in tab_direction:
         pos[0]+=i[0]
         pos[1]+=i[1]
-        #print(preview_board)
-        #print(pos)
         complete_boxes(preview_board,num_player,old_pos)
         preview_points = count_boxes(preview_board,num_player)
         new_points = count_boxes(preview_board,num_player)
@@ -166,7 +124,6 @@ def best_reward_and_position(pos,preview_board,num_player,old_pos):
 
 def calculate_reward(board,ai_position,opp_position,gameplayer): 
     preview_state = gameplayer.preview_state_ai
-    print("TEST",preview_state.position)
     try:
         pos_ai = string_to_list( preview_state.position)
     except Exception as e:
@@ -204,29 +161,3 @@ def count_cells(old_board, new_board, num_player):
     return new_nb_boxes - old_nb_boxes
     
     
-    
-
-
-'''def best_direction(num_player,direction,position,board)
-    
-    nb_cell_max = 0
-    nb_old_cell = 0
-    for line in board:
-            for cell in line:
-                if cell == num_player:
-                    nb_old_cell+=1
-
-    for dir in direction:
-        nb_cell = 0
-        new_board = board
-        new_pos = [position[0]+dir[0],position[1]+dir[1]]
-        complete_boxes(new_board,num_player,new_pos)
-        for line in new_board:
-            for cell in line:
-                if cell == num_player:
-                    nb_cell+=1
-        if nb_cell >= nb_cell_max:
-            nb_cell_max = nb_cell
-            best_dir = dir
-        
-    return nb_cell_max-nb_old_cell,best_dir'''

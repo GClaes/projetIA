@@ -168,53 +168,38 @@ class AIForm(forms.Form):
 
 
 def index(request):
-    if request.method == "GET": # get connection page
-        #Login de Test
-        ud = User_data(password = "test")
-        ud.save()
-        u = User(username = "Test", user_data = ud, color1 = "R", color2="B",nb_games_wins = 0,nb_games = 0)
-        u.save()
-        #
-        form = ConnectionForm() # empty form
+    if request.method == "GET":
+        form = ConnectionForm()
         return render(request, "connection/index.html", { "form": form })
 
-    if request.method == "POST": # post a connection
-        form = ConnectionForm(request.POST) #auto fill form with info in POST
-        
+    if request.method == "POST":
+        form = ConnectionForm(request.POST) 
         if form.is_valid():
-            return render(request, "game/index.html", { "form": form })
-        
+            return HttpResponse("Vous êtes connecté") #A modifier pour la démo
         return render(request, "connection/index.html", { "form": form })
 
 def signup(request):
     if request.method == "GET":
         form = SignupForm()
         return render(request, "connection/signup.html", { "form": form })
-    if request.method == "POST":
-        form = SignupForm(request.POST) #auto fill form with info in POST
-        if form.is_valid():
-            #Enregister en base de données
-            cd_username = form.cleaned_data.get("username") #Permet d'accéder aux champs
-            cd_password = form.cleaned_data.get("password")
 
+    if request.method == "POST":
+        form = SignupForm(request.POST)
+        if form.is_valid():
+            cd_username = form.cleaned_data.get("username")
+            cd_password = form.cleaned_data.get("password")
             cd_colors = []
             color1 = form.cleaned_data.get("fav_color1")
             color2 = form.cleaned_data.get("fav_color2")
             cd_colors.append(color1[0])
             cd_colors.append(color2[0])
-
             ud = User_data(password=cd_password)
             ud.save()
             u = User(username=cd_username, user_data = ud, color1=cd_colors[0], color2=cd_colors[1],nb_games=0,nb_games_wins = 0)
             u.save()
-
-
-            #Permet de vérifier que ça a bien enregistré et de récupérer le compte
             user = User.manager.get(username = cd_username)
-            #return HttpResponse("You are correctly signed up "+user.username+"//"+user.user_data.password+"//"+user.color1+"//"+user.color2)
-            form = ConnectionForm(request.POST)
+            form = ConnectionForm()
             return render(request, "connection/index.html", { "form": form })
-
         return render(request, "connection/signup.html", { "form": form })
 
 def signup_ai(request):
@@ -228,22 +213,14 @@ def signup_ai(request):
             c_epsilon = form.cleaned_data.get("epsilon")
             c_learning_rate = form.cleaned_data.get("learning_rate")
             c_speed_learning = form.cleaned_data.get("speed_learning")
-
             cd_colors = []
             color1 = form.cleaned_data.get("fav_color1")
             color2 = form.cleaned_data.get("fav_color2")
             cd_colors.append(color1[0])
             cd_colors.append(color2[0])
-
             ai = AI(username = c_ai_name, epsilon= c_epsilon, nb_games=0, user_data = None, color1=cd_colors[0], color2=cd_colors[1],learning_rate = c_learning_rate, nb_games_wins = 0,speed_learning = c_speed_learning)
             ai.save()
-
             ai = AI.manager.get(username = c_ai_name)
-
-            form = ConnectionForm(request.POST)
+            form = ConnectionForm()
             return render(request, "connection/index.html", { "form": form })
-
-            return HttpResponse("You are correctly signed up "+ai.username)
-
         return render(request, "connection/signup_ai.html", {"form": form})
-
