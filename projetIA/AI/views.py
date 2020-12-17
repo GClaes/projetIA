@@ -21,7 +21,7 @@ def play_ai(board,pos1,pos2,user,game_player,curr_player):
     direction = move(eps,board_db.q_table,board_db.position)
     while not verify_direction(direction,board,pos1,curr_player):
         direction = move(eps,board_db.q_table,board_db.position)
-    if game_player.preview_state_ai:
+    if game_player.previous_state_ai:
         update_q_table(board,board_db,pos1,pos2,user.ai_id,game_player,direction)
     direction_board = [tab_direction[direction],board_db]
     return direction_board
@@ -84,15 +84,15 @@ def register_board(board,position,position2,ai):
     return state
 
 def update_q_table(board,board_db,pos1,pos2,ai,game_player,direction):
-    old_q = string_to_list(game_player.preview_state_ai.q_table)
+    old_q = string_to_list(game_player.previous_state_ai.q_table)
     q_table_list = string_to_list(board_db.q_table)
     max_q = max(q_table_list)
     recompense=calculate_reward(board,pos1,pos2,game_player)
     old_q[direction] = old_q[direction] + ai.learning_rate*(recompense+max_q-old_q[direction])
-    state=game_player.preview_state_ai
+    state=game_player.previous_state_ai
     state.q_table=old_q
     state.save()
-    game_player.preview_state_ai.q_table=old_q
+    game_player.previous_state_ai.q_table=old_q
     game_player.save()
     board_db.save()
     ai.save()
@@ -100,7 +100,7 @@ def update_q_table(board,board_db,pos1,pos2,ai,game_player,direction):
 def count_boxes(board,num_player):
     return reduce(lambda x,y: x+y, board).count(num_player)
 
-def best_reward_and_position(pos,preview_board,num_player,old_pos):
+def best_reward_and_position(pos,previous_board,num_player,old_pos):
     
     up = [-1,0]
     down = [1,0]
@@ -114,10 +114,10 @@ def best_reward_and_position(pos,preview_board,num_player,old_pos):
     for i in tab_direction:
         pos[0]+=i[0]
         pos[1]+=i[1]
-        complete_boxes(preview_board,num_player,old_pos)
-        preview_points = count_boxes(preview_board,num_player)
-        new_points = count_boxes(preview_board,num_player)
-        reward = new_points - preview_points
+        complete_boxes(previous_board,num_player,old_pos)
+        previous_points = count_boxes(previous_board,num_player)
+        new_points = count_boxes(previous_board,num_player)
+        reward = new_points - previous_points
         if reward > best_points:
             best_points = reward
             best_position = pos
@@ -125,26 +125,26 @@ def best_reward_and_position(pos,preview_board,num_player,old_pos):
     return best_points,best_position
 
 def calculate_reward(board,ai_position,opp_position,gameplayer): 
-    preview_state = gameplayer.preview_state_ai
+    previous_state = gameplayer.previous_state_ai
     try:
-        pos_ai = string_to_list( preview_state.position)
+        pos_ai = string_to_list( previous_state.position)
     except Exception as e:
-        pos_ai =preview_state.position
+        pos_ai =previous_state.position
     pos = opp_position
     try:
-        preview_board = string_to_list(preview_state.board)
+        previous_board = string_to_list(previous_state.board)
     except Exception as e:
-        preview_board = preview_state.board
+        previous_board = previous_state.board
 
     try:
-        preview_opp_pos = string_to_list(preview_state.position2)
+        previous_opp_pos = string_to_list(previous_state.position2)
     except Exception as e:
-        preview_opp_pos = preview_state.position2
+        previous_opp_pos = previous_state.position2
     num_opp = board[pos[0]][pos[1]]
     num_player = board[ai_position[0]][ai_position[1]]
     
-    best_points_opp,best_position_opp = best_reward_and_position(pos,preview_board,num_opp,preview_opp_pos)
-    best_points_ai,best_position_ai = best_reward_and_position(ai_position,preview_board,num_player,pos_ai)
+    best_points_opp,best_position_opp = best_reward_and_position(pos,previous_board,num_opp,previous_opp_pos)
+    best_points_ai,best_position_ai = best_reward_and_position(ai_position,previous_board,num_player,pos_ai)
 
     
     if ai_position == best_position_opp:
@@ -153,7 +153,7 @@ def calculate_reward(board,ai_position,opp_position,gameplayer):
         else:
             return 1
     else:
-        return count_cells(preview_board,board,num_player)
+        return count_cells(previous_board,board,num_player)
 
 
 def count_cells(old_board, new_board, num_player):

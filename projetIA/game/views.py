@@ -136,6 +136,6 @@ def play(board, game_players, indice):
     user = User.manager.get(username=game_players[indice].user.username)
     direction_board =play_ai(board,game_players[indice].pos,game_players[i_o].pos,user,game_players[indice],indice)
     movement = direction_board[0]
-    game_players[indice].preview_state_ai = direction_board[1]
+    game_players[indice].previous_state_ai = direction_board[1]
     save_data(game_players[indice])
     return movement 
