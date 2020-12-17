@@ -1,4 +1,5 @@
 from django.db import models
+from AI.models import AI
 
 class User_data(models.Model):
     auto_increment_id = models.AutoField(primary_key = True)
@@ -12,6 +13,7 @@ class User(models.Model):
     color2=models.CharField(max_length=25)
     nb_games = models.IntegerField()
     nb_games_wins = models.IntegerField()
+    ai_id = models.ForeignKey(AI,on_delete=models.CASCADE,blank=True,null=True)
 
     manager = models.Manager()
     

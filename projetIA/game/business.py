@@ -230,16 +230,15 @@ def print_winner(game_state, game_player):
     return game_state
 
 def is_current_player_ai(game_player):
-    return game_player.is_ai
+    return game_player.user.ai_id
 
 def save_game_turn(game_state_data, game_players):
     save_data(game_state_data)
     for game_player in game_players:
         save_data(game_player)
 
-def get_game_player(username, is_ai, game_state_data, pos,col):
+def get_game_player(username,game_state_data, pos,col):
     u = User.manager.get(username = username)
     game_player = Game_Player(user=u, game_state=game_state_data, pos=pos , color = col)
-    game_player.is_ai = is_ai
     game_player.save()
     return game_player

@@ -8,26 +8,28 @@ from random import randint
 from functools import reduce
 
 
-def play_ai(board,pos1,pos2,ai,game_player,curr_player):
+def play_ai(board,pos1,pos2,user,game_player,curr_player):
+    ai = AI.manager.get(id = user.ai_id.id)
     up = [-1,0]
     down = [1,0]
     right = [0,1]
     left=[0,-1]
     tab_direction=[up,down,right,left]
 
-    eps = epsilon_greedy(ai)
+    eps = epsilon_greedy(ai,user)
     board_db = verify_board(board,pos1,pos2,ai)
     direction = move(eps,board_db.q_table,board_db.position)
     while not verify_direction(direction,board,pos1,curr_player):
         direction = move(eps,board_db.q_table,board_db.position)
     if game_player.preview_state_ai:
-        update_q_table(board,board_db,pos1,pos2,ai,game_player,direction)
+        update_q_table(board,board_db,pos1,pos2,user.ai_id,game_player,direction)
     direction_board = [tab_direction[direction],board_db]
     return direction_board
 
-def epsilon_greedy(ai): 
+def epsilon_greedy(ai,user): 
+    print(ai.epsilon)
     E=ai.epsilon
-    i_partie=ai.nb_games
+    i_partie=user.nb_games
     if i_partie % ai.speed_learning == 0:
         E = (E /100) * 95
     if E < 5: return 5

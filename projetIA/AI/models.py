@@ -1,8 +1,7 @@
 from django.db import models
-from connection.models import User
 
 # Create your models here.
-class AI(User):
+class AI(models.Model):
     id = models.AutoField(primary_key = True)
     epsilon = models.FloatField()
     speed_learning = models.IntegerField()

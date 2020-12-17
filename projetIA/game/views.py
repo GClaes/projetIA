@@ -14,9 +14,9 @@ from AI.views import play_ai
 
 class NewGameForm(forms.Form):
     player1 = forms.CharField(label="Player 1")
-    is_ai1 = forms.BooleanField(label="Is player 1 an AI", required=False)
+    #is_ai1 = forms.BooleanField(label="Is player 1 an AI", required=False)
     player2 = forms.CharField(label="Player 2")
-    is_ai2 = forms.BooleanField(label="Is player 2 an AI", required=False)
+    #is_ai2 = forms.BooleanField(label="Is player 2 an AI", required=False)
 
 def index(request):
     if request.method == "GET":
@@ -39,15 +39,16 @@ def index(request):
             u2.nb_games+=1
             u2.save()
             colors = build_colors([u1,u2])
-            game_player1 = get_game_player(username1, form.cleaned_data.get("is_ai1"), game_state_data, [0,0],colors[0])
-            game_player2 = get_game_player(username2, form.cleaned_data.get("is_ai2"), game_state_data, [3,3],colors[1])
+            game_player1 = get_game_player(username1,game_state_data, [0,0],colors[0])
+            game_player2 = get_game_player(username2,game_state_data, [3,3],colors[1])
             game_players = [game_player1, game_player2]
             indice=0
             game_state = build_game_state(game_state_data, [game_player1, game_player2], game_player1.auto_increment_id,0)  
-            if form.cleaned_data.get("is_ai1"):
+            ''''if form.cleaned_data.get("is_ai1"):
                 game_state["AI_1"]= 1
             if form.cleaned_data.get("is_ai2"):
-                game_state["AI_2"]= 1
+                game_state["AI_2"]= 1'''
+            print(is_current_player_ai(game_players[indice]))
             while is_current_player_ai(game_players[indice]) and not end_of_game(game_state_data.board):
                 movement = play(board, game_players,indice)
                 game_state_data = move_pos(game_players[indice], movement, game_state_data, game_players)
@@ -95,7 +96,11 @@ def apply_move(request) :
         game_state = build_game_state(game_state_data, game_players, curr_player, 2)
     else:
         if end_of_game(game_state_data.board):
-            game_state = print_winner(game_state, game_players[indice])
+            print(game_players[indice])
+            winner_id, nb_cell_winner, tie = define_winner(game_state.get("board"))
+            game_players[winner_id-1].user.nb_games_wins+=1
+            game_players[winner_id-1].user.save()
+            game_state = print_winner(game_state, game_players[winner_id-1])
         else:
             curr_player = change_player(game_players, indice)
             game_state = build_game_state(game_state_data, game_players, curr_player, 0)
@@ -108,7 +113,11 @@ def apply_move(request) :
     if is_current_player_ai(game_players[indice]):
         game_state = ai_play(curr_player, game_players, game_state_data, indice)
         if end_of_game(game_state["board"]):
-            game_state = print_winner(game_state, game_players[indice])
+            winner_id, nb_cell_winner, tie = define_winner(game_state.get("board"))
+            game_players[winner_id-1].user.nb_games_wins+=1
+            game_players[winner_id-1].user.save()
+            game_state = print_winner(game_state, game_players[winner_id-1])
+            #game_state = print_winner(game_state, game_players[indice-1])
     return JsonResponse(game_state)
 
 def ai_play(curr_player, game_players, game_state_data, indice):
@@ -124,8 +133,8 @@ def play(board, game_players, indice):
         i_o = 0
     else:
         i_o = 1
-    ai = AI.manager.get(username=game_players[indice].user.username)
-    direction_board =play_ai(board,game_players[indice].pos,game_players[i_o].pos,ai,game_players[indice],indice)
+    user = User.manager.get(username=game_players[indice].user.username)
+    direction_board =play_ai(board,game_players[indice].pos,game_players[i_o].pos,user,game_players[indice],indice)
     movement = direction_board[0]
     game_players[indice].preview_state_ai = direction_board[1]
     save_data(game_players[indice])

@@ -159,8 +159,9 @@ class AIForm(forms.Form):
             raise forms.ValidationError("Speed value is not correct")
 
         try:
-            ai = AI.manager.get(username = c_ai_name)
-        except AI.DoesNotExist:
+            #ai = AI.manager.get(username = c_ai_name)
+            ai = User.manager.get(username = c_ai_name)
+        except User.DoesNotExist:
             return cd
         raise forms.ValidationError("AI with this name does already exist")
         
@@ -218,9 +219,11 @@ def signup_ai(request):
             color2 = form.cleaned_data.get("fav_color2")
             cd_colors.append(color1[0])
             cd_colors.append(color2[0])
-            ai = AI(username = c_ai_name, epsilon= c_epsilon, nb_games=0, user_data = None, color1=cd_colors[0], color2=cd_colors[1],learning_rate = c_learning_rate, nb_games_wins = 0,speed_learning = c_speed_learning)
+            ai = AI(epsilon= c_epsilon,learning_rate = c_learning_rate,speed_learning = c_speed_learning)
             ai.save()
-            ai = AI.manager.get(username = c_ai_name)
+            user = User(username = c_ai_name, user_data = None, color1=cd_colors[0], color2=cd_colors[1],nb_games_wins = 0,nb_games = 0,ai_id = ai)
+            user.save()
+            #ai = AI.manager.get(username = c_ai_name)
             form = ConnectionForm()
             return render(request, "connection/index.html", { "form": form })
         return render(request, "connection/signup_ai.html", {"form": form})

@@ -16,6 +16,5 @@ class Game_Player(models.Model):
     game_state=models.ForeignKey(Game_State,on_delete=models.CASCADE)
     pos=models.CharField(max_length=5)
     color = models.CharField(max_length=146)
-    is_ai = models.BooleanField(default=False)
     preview_state_ai=models.ForeignKey(State,on_delete=models.CASCADE,blank=True,null=True)
     manager = models.Manager()
