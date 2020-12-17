@@ -18,7 +18,6 @@ class State(models.Model):
     position2 = models.CharField(max_length=2)
     q_table = models.CharField(max_length=100)
     ai_id=models.ForeignKey(AI,on_delete=models.CASCADE)
-
     manager = models.Manager()
 
 

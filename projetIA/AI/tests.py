@@ -23,3 +23,4 @@ class qtableCountValueTest(TestCase):
         q_table = [0,0,0,0]
         self.assertEquals(qtable_count_value(q_table),0)
 
+

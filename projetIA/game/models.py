@@ -19,5 +19,3 @@ class Game_Player(models.Model):
     is_ai = models.BooleanField(default=False)
     preview_state_ai=models.ForeignKey(State,on_delete=models.CASCADE,blank=True,null=True)
     manager = models.Manager()
-   
-
