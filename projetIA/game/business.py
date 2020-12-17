@@ -140,8 +140,6 @@ def define_winner(board):
 def end_of_game(board):
     return all([line.count(0)==0 for line in board])
 
-
-
 def complete_boxes(board,player,coord):
     list_coor=[]
     completed_list=[]
@@ -165,16 +163,10 @@ def complete_boxes(board,player,coord):
                     del x[y]
             if len(x)%2==1:           
                     list_coor.remove(x)
-
-    #print( "liste de base : {}".format(list_coor))            
-    list_of_boxes_to_fill(list_coor,board,player,completed_list)
-    #print("case a remplir:{}".format(completed_list))
-    
+    list_of_boxes_to_fill(list_coor,board,player,completed_list)    
     tab=clean_tab(completed_list)
     board=complete_board(tab,board,player)    
     
-
-
 def list_of_boxes_to_fill(liste,board,player,full_liste):
     for elem in liste:
         temp_liste=[elem]
@@ -186,10 +178,7 @@ def list_of_boxes_to_fill(liste,board,player,full_liste):
         full_liste.append(temp_liste)    
     return full_liste  
 
-
-    
 def free_boxes(coord,board,player,temp_liste):   
-    
     if coord[0]>0 and board[coord[0]-1][coord[1]]==0:
         coord1=[coord[0]-1,coord[1]]
         if coord1 not in temp_liste:
@@ -238,7 +227,6 @@ def print_winner(game_state, game_player):
     game_player.user.nb_games_wins+=1
     game_player.user.save()
     game_state["winner"] =  data_winner
-
     return game_state
 
 def is_current_player_ai(game_player):
