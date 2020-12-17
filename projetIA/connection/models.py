@@ -10,6 +10,8 @@ class User(models.Model):
     user_data=models.ForeignKey(User_data,on_delete=models.CASCADE, null= True)
     color1=models.CharField(max_length=25)
     color2=models.CharField(max_length=25)
+    nb_games = models.IntegerField()
+    nb_games_wins = models.IntegerField()
 
     manager = models.Manager()
     

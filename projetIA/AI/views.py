@@ -8,13 +8,14 @@ from random import randint
 
 # Create your views here.
 def play_ai(board,pos1,pos2,ai,game_player,curr_player):
+    print("board debut IA",board)
     up = [-1,0]
     down = [1,0]
     right = [0,1]
     left=[0,-1]
     tab_direction=[up,down,right,left]
 
-    eps = epsilon_greedy(1,ai)
+    eps = epsilon_greedy(ai)
     board_db = verify_board(board,pos1,pos2,ai)
     direction = move(eps,board_db.q_table,board_db.position)
     while not verify_direction(direction,board,pos1,curr_player):
@@ -24,10 +25,10 @@ def play_ai(board,pos1,pos2,ai,game_player,curr_player):
     direction_board = [tab_direction[direction],board_db]
     return direction_board
 
-def epsilon_greedy(rapidite,ai): 
+def epsilon_greedy(ai): 
     E=ai.epsilon
     i_partie=ai.nb_games
-    if i_partie % rapidite == 0:
+    if i_partie % ai.speed_learning == 0:
         E = (E /100) * 95
     if E < 5: return 5
     ai.epsilon=E
@@ -74,7 +75,7 @@ def verify_direction(direction,board,pos1,curr_player):
     y=pos[1]+move[1]
     
    
-    if x < 0 or x > 7 or y < 0 or y > 7: #virer hardcoding
+    if x < 0 or x > 3 or y < 0 or y > 3: #virer hardcoding
         return False
     else:
         if board[x][y] ==curr_player+1 or board[x][y] == 0:
@@ -83,13 +84,17 @@ def verify_direction(direction,board,pos1,curr_player):
             return False
 
 def verify_board(searched_board,searched_position1,searched_position2,ai):
-    board=str(searched_board)
+    #board=str(searched_board)
+    print("board en string",searched_board)
     pos1=str(searched_position1)
     pos2=str(searched_position2)
+
     try:
-        board_db = State.manager.get(board = board, position = pos1,position2 = pos2,ai_id=ai.id)
-        #print("state= " ,board_db)
+        board_db = State.manager.get(board = searched_board, position = pos1,position2 = pos2,ai_id=ai)
+        print("state connu = " ,board_db.board)
+
     except Exception as e:
+        print("new state",searched_board)
         board_db = register_board(searched_board,searched_position1,searched_position2,ai)
     return board_db
 #ICI
@@ -111,7 +116,7 @@ def update_q_table(board,board_db,pos1,pos2,ai,game_player,direction):
     #print(type(max_q))
     #print(type(old_q))
     #print('recompense= ',recompense)
-    old_q[direction] = old_q[direction] + 0.9*(recompense+max_q-old_q[direction])
+    old_q[direction] = old_q[direction] + ai.learning_rate*(recompense+max_q-old_q[direction])
     state=game_player.preview_state_ai
     #print("old_q",old_q)
     state.q_table=old_q

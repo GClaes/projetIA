@@ -3,6 +3,7 @@ from django.http import HttpResponse
 from django import forms
 from connection.models import User, User_data
 from AI.models import AI
+from game.views import NewGameForm
 
 class ConnectionForm (forms.Form):
     username = forms.CharField(label="Username")
@@ -47,12 +48,12 @@ class SignupForm (forms.Form):
         ]
 
     fav_color1 = forms.MultipleChoiceField(
-        label = 'Colors 1',
+        label = 'Color 1',
         required=False,
         choices= COLOR_CHOICES,
     )
     fav_color2 = forms.MultipleChoiceField(
-        label = 'Colors 2',
+        label = 'Color 2',
         required=False,
         choices= COLOR_CHOICES,
     )
@@ -93,7 +94,9 @@ class SignupForm (forms.Form):
 
 class AIForm(forms.Form):
     ai_name = forms.CharField(label="AI Name")
-    epsilon = forms.CharField(label="Epsilon")
+    epsilon = forms.IntegerField(label="Epsilon (0-100)")
+    learning_rate = forms.FloatField(label ="Learning rate (0-1)")
+    speed_learning = forms.IntegerField(label=" Speed (>0)")
 
     COLOR_CHOICES = [
             ('blue', 'blue'),
@@ -112,12 +115,12 @@ class AIForm(forms.Form):
         ]   
 
     fav_color1 = forms.MultipleChoiceField(
-        label = 'Colors 1',
+        label = 'Color 1',
         required=False,
         choices= COLOR_CHOICES,
     )
     fav_color2 = forms.MultipleChoiceField(
-        label = 'Colors 2',
+        label = 'Color 2',
         required=False,
         choices= COLOR_CHOICES,
     )
@@ -144,6 +147,17 @@ class AIForm(forms.Form):
         colors.append(color1[0])
         colors.append(color2[0])
 
+        c_epsilon =  cd.get("epsilon")
+        c_learning_rate = cd.get("learning_rate")
+        c_speed_learning = cd.get("speed_learning")
+
+        if c_epsilon > 100 or c_epsilon < 0:
+            raise forms.ValidationError("Epsilon value is not correct")
+        if c_learning_rate > 1 or c_learning_rate < 0:
+            raise forms.ValidationError("Learning rate value is not correct")
+        if c_speed_learning < 1:
+            raise forms.ValidationError("Speed value is not correct")
+
         try:
             ai = AI.manager.get(username = c_ai_name)
         except AI.DoesNotExist:
@@ -158,7 +172,7 @@ def index(request):
         #Login de Test
         ud = User_data(password = "test")
         ud.save()
-        u = User(username = "Test", user_data = ud, color1 = "R", color2="B")
+        u = User(username = "Test", user_data = ud, color1 = "R", color2="B",nb_games_wins = 0,nb_games = 0)
         u.save()
         #
         form = ConnectionForm() # empty form
@@ -168,7 +182,7 @@ def index(request):
         form = ConnectionForm(request.POST) #auto fill form with info in POST
         
         if form.is_valid():
-            return HttpResponse("OK")
+            return render(request, "game/index.html", { "form": form })
         
         return render(request, "connection/index.html", { "form": form })
 
@@ -191,13 +205,15 @@ def signup(request):
 
             ud = User_data(password=cd_password)
             ud.save()
-            u = User(username=cd_username, user_data = ud, color1=cd_colors[0], color2=cd_colors[1])
+            u = User(username=cd_username, user_data = ud, color1=cd_colors[0], color2=cd_colors[1],nb_games=0,nb_games_wins = 0)
             u.save()
 
 
             #Permet de vérifier que ça a bien enregistré et de récupérer le compte
             user = User.manager.get(username = cd_username)
-            return HttpResponse("You are correctly signed up "+user.username+"//"+user.user_data.password+"//"+user.color1+"//"+user.color2)
+            #return HttpResponse("You are correctly signed up "+user.username+"//"+user.user_data.password+"//"+user.color1+"//"+user.color2)
+            form = ConnectionForm(request.POST)
+            return render(request, "connection/index.html", { "form": form })
 
         return render(request, "connection/signup.html", { "form": form })
 
@@ -210,6 +226,8 @@ def signup_ai(request):
         if form.is_valid():
             c_ai_name = form.cleaned_data.get("ai_name")
             c_epsilon = form.cleaned_data.get("epsilon")
+            c_learning_rate = form.cleaned_data.get("learning_rate")
+            c_speed_learning = form.cleaned_data.get("speed_learning")
 
             cd_colors = []
             color1 = form.cleaned_data.get("fav_color1")
@@ -217,10 +235,13 @@ def signup_ai(request):
             cd_colors.append(color1[0])
             cd_colors.append(color2[0])
 
-            ai = AI(username = c_ai_name, epsilon= c_epsilon, nb_games=0, user_data = None, color1=cd_colors[0], color2=cd_colors[1])
+            ai = AI(username = c_ai_name, epsilon= c_epsilon, nb_games=0, user_data = None, color1=cd_colors[0], color2=cd_colors[1],learning_rate = c_learning_rate, nb_games_wins = 0,speed_learning = c_speed_learning)
             ai.save()
 
             ai = AI.manager.get(username = c_ai_name)
+
+            form = ConnectionForm(request.POST)
+            return render(request, "connection/index.html", { "form": form })
 
             return HttpResponse("You are correctly signed up "+ai.username)
 

@@ -29,8 +29,8 @@ def index(request):
     if request.method == "POST": 
         form = NewGameForm(request.POST)
         if form.is_valid():
-            board = [[1,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,2]]
-            #board = [[1,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,2]]
+            #board = [[1,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,2]]
+            board = [[1,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,2]]
             game_state_data = Game_State(current_player=1, board=board)
             game_state_data.save()
 
@@ -38,11 +38,15 @@ def index(request):
             username2 = form.cleaned_data.get("player2")
             
             u1 = User.manager.get(username = username1)
+            u1.nb_games+=1
+            u1.save()
             u2 = User.manager.get(username = username2)
+            u2.nb_games+=1
+            u2.save()
             colors = build_colors([u1,u2])
             
             game_player1 = get_game_player(username1, form.cleaned_data.get("is_ai1"), game_state_data, [0,0],colors[0])
-            game_player2 = get_game_player(username2, form.cleaned_data.get("is_ai2"), game_state_data, [7,7],colors[1])
+            game_player2 = get_game_player(username2, form.cleaned_data.get("is_ai2"), game_state_data, [3,3],colors[1])
             game_players = [game_player1, game_player2]
 
             indice=0
@@ -52,28 +56,31 @@ def index(request):
                 game_state["AI_1"]= 1
             if form.cleaned_data.get("is_ai2"):
                 game_state["AI_2"]= 1
-
             #PERMET A L IA DE JOUER
             while is_current_player_ai(game_players[indice]) and not end_of_game(game_state_data.board):
                 movement = play(board, game_players,indice)
                 game_state_data = move_pos(game_players[indice], movement, game_state_data, game_players)
+                #print("nouveau tableau",game_state_data.board)
+                #print("ancien tableau",game_players[indice].preview_state_ai.board)
                 current_player = change_player(game_players, indice)
                 game_state_data.current_player = current_player
-                #Persister les données
+                #Persister les 
                 save_data(game_state_data)
                 for game_player in game_players:
                     save_data(game_player)
                 game_state = build_game_state(game_state_data, [game_player1, game_player2], game_player2.auto_increment_id,0)
                 indice = index_player(current_player, game_players)
-                
                 if end_of_game(game_state_data.board):
                     game_state = build_game_state(game_state_data, game_players, current_player, 0)
                     winner_id, nb_cell_winner, tie = define_winner(game_state.get("board"))
-
+                    game_players[winner_id-1].user.nb_games_wins+=1
+                    game_players[winner_id-1].user.save()
                     data_winner = {"name": game_players[winner_id-1].user.username, "nb_cell": nb_cell_winner, "tie":tie}
                     game_state["winner"] =  data_winner
-                    print(game_state)
+                    print('nbgamesu1u2 : ',u1.nb_games,u2.nb_games)
+                    print('nbwinsu1u2 : ',game_players[winner_id-1].user.nb_games_wins)
                     text = "Resultat: "+game_state.get("winner").get("name")+" avec "+str(game_state.get("winner").get("nb_cell"))
+
                     return HttpResponse(text)
             
 
@@ -107,10 +114,13 @@ def apply_move(request) :
         game_state = build_game_state(game_state_data, game_players, curr_player, 2)
     else:
         if end_of_game(game_state_data.board):
+            print("FIN DE LA GAME")
             game_state = build_game_state(game_state_data, game_players, curr_player, 0)
             winner_id, nb_cell_winner, tie = define_winner(game_state.get("board"))
 
             data_winner = {"name": game_players[winner_id-1].user.username, "nb_cell": nb_cell_winner, "tie":tie}
+            game_players[winner_id-1].user.nb_games_wins+=1
+            game_players[winner_id-1].user.save()
             game_state["winner"] =  data_winner
         else:
             curr_player = change_player(game_players, indice)
@@ -126,7 +136,15 @@ def apply_move(request) :
     indice = index_player(int(curr_player), game_players)
     if is_current_player_ai(game_players[indice]):
         game_state = ai_play(curr_player, game_players, game_state_data, indice)
-    #
+        if end_of_game(game_state["board"]):
+            print("FIN DE PARTIE TEST")
+            winner_id, nb_cell_winner, tie = define_winner(game_state.get("board"))
+
+            data_winner = {"name": game_players[winner_id-1].user.username, "nb_cell": nb_cell_winner, "tie":tie}
+            game_players[winner_id-1].user.nb_games_wins+=1
+            game_players[winner_id-1].user.save()
+            game_state["winner"] =  data_winner
+
 
     print(game_state)
     print("C'est à ", game_state.get("current_player"))
@@ -151,7 +169,7 @@ def play(board, game_players, indice):
     direction_board =play_ai(board,game_players[indice].pos,game_players[i_o].pos,ai,game_players[indice],indice)
     movement = direction_board[0]
     game_players[indice].preview_state_ai = direction_board[1]
-    print("LE TRUC IMPORTANT",direction_board[1])
+    print("LE TRUC IMPORTANT",direction_board[1].id)
     save_data(game_players[indice])
     print("IA vient de jouer")
     return movement 

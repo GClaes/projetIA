@@ -3,9 +3,10 @@ from connection.models import User
 
 # Create your models here.
 class AI(User):
-    id = models.AutoField(primary_key = True)   
-    nb_games = models.IntegerField()
+    id = models.AutoField(primary_key = True)
     epsilon = models.FloatField()
+    speed_learning = models.IntegerField()
+    learning_rate = models.FloatField()
     manager = models.Manager()
 
 
