@@ -37,7 +37,7 @@ def index(request):
             u2.save()
             colors = build_colors([u1,u2])
             game_player1 = get_game_player(username1,game_state_data, [0,0],colors[0])
-            game_player2 = get_game_player(username2,game_state_data, [3,3],colors[1])
+            game_player2 = get_game_player(username2,game_state_data, [7,7],colors[1])
             game_players = [game_player1, game_player2]
             indice=0
             game_state = build_game_state(game_state_data, [game_player1, game_player2], game_player1.auto_increment_id,0)  
