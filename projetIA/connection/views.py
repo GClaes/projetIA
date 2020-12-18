@@ -17,7 +17,7 @@ class ConnectionForm (forms.Form):
 
         try:
             user = User.manager.get(username = c_username)
-        except User.DoesNotExist: #Aucune idée de pourquoi c'est souligné en rouge alors que c'est bon ?
+        except User.DoesNotExist:
             raise forms.ValidationError("User doesn't exist")
 
         if(user.user_data.password != c_password):

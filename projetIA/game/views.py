@@ -14,9 +14,7 @@ from AI.views import play_ai
 
 class NewGameForm(forms.Form):
     player1 = forms.CharField(label="Player 1")
-    #is_ai1 = forms.BooleanField(label="Is player 1 an AI", required=False)
     player2 = forms.CharField(label="Player 2")
-    #is_ai2 = forms.BooleanField(label="Is player 2 an AI", required=False)
 
 def index(request):
     if request.method == "GET":
@@ -26,8 +24,7 @@ def index(request):
     if request.method == "POST": 
         form = NewGameForm(request.POST)
         if form.is_valid():
-            #board = [[1,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,2]]
-            board = [[1,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,2]]
+            board = [[1,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,2]]
             game_state_data = Game_State(current_player=1, board=board)
             game_state_data.save()
             username1 = form.cleaned_data.get("player1")
@@ -44,11 +41,6 @@ def index(request):
             game_players = [game_player1, game_player2]
             indice=0
             game_state = build_game_state(game_state_data, [game_player1, game_player2], game_player1.auto_increment_id,0)  
-            ''''if form.cleaned_data.get("is_ai1"):
-                game_state["AI_1"]= 1
-            if form.cleaned_data.get("is_ai2"):
-                game_state["AI_2"]= 1'''
-            print(is_current_player_ai(game_players[indice]))
             while is_current_player_ai(game_players[indice]) and not end_of_game(game_state_data.board):
                 movement = play(board, game_players,indice)
                 game_state_data = move_pos(game_players[indice], movement, game_state_data, game_players)
@@ -117,7 +109,6 @@ def apply_move(request) :
             game_players[winner_id-1].user.nb_games_wins+=1
             game_players[winner_id-1].user.save()
             game_state = print_winner(game_state, game_players[winner_id-1])
-            #game_state = print_winner(game_state, game_players[indice-1])
     return JsonResponse(game_state)
 
 def ai_play(curr_player, game_players, game_state_data, indice):

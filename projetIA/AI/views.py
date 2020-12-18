@@ -59,7 +59,7 @@ def verify_direction(direction,board,pos,curr_player):
     x=pos[0]+tab_direction[direction][0]
     y=pos[1]+tab_direction[direction][1]
    
-    if x < 0 or x > 3 or y < 0 or y > 3: 
+    if x < 0 or x > 7 or y < 0 or y > 7: 
         return False
     else:
         return board[x][y] ==curr_player+1 or board[x][y] == 0
