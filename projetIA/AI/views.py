@@ -27,7 +27,6 @@ def play_ai(board,pos1,pos2,user,game_player,curr_player):
     return direction_board
 
 def epsilon_greedy(ai,user): 
-    print(ai.epsilon)
     E=ai.epsilon
     i_partie=user.nb_games
     if i_partie % ai.speed_learning == 0:
@@ -71,11 +70,9 @@ def verify_board(searched_board,searched_position1,searched_position2,ai):
 
     try:
         board_db = State.manager.get(board = board, position = pos1,position2 = pos2,ai_id=ai)
-        print("state connu = " ,board_db.board)
 
     except Exception as e:
         board_db = register_board(board,pos1,pos2,ai)
-        print("-")
     return board_db
 
 def register_board(board,position,position2,ai):

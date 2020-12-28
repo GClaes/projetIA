@@ -88,7 +88,6 @@ def apply_move(request) :
         game_state = build_game_state(game_state_data, game_players, curr_player, 2)
     else:
         if end_of_game(game_state_data.board):
-            print(game_players[indice])
             winner_id, nb_cell_winner, tie = define_winner(game_state.get("board"))
             game_players[winner_id-1].user.nb_games_wins+=1
             game_players[winner_id-1].user.save()
@@ -127,6 +126,5 @@ def play(board, game_players, indice):
     user = User.manager.get(username=game_players[indice].user.username)
     direction_board =play_ai(board,game_players[indice].pos,game_players[i_o].pos,user,game_players[indice],indice)
     movement = direction_board[0]
-    game_players[indice].previous_state_ai = direction_board[1]
     save_data(game_players[indice])
     return movement 

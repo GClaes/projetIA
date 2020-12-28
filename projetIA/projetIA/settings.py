@@ -35,6 +35,7 @@ INSTALLED_APPS = [
     'connection.apps.ConnectionConfig',
     'game.apps.GameConfig',
     'AI.apps.AiConfig',
+    'train.apps.TrainConfig',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
