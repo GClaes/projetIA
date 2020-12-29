@@ -224,8 +224,6 @@ def complete_board(tab,board,player):
 def print_winner(game_state, game_player):
     winner_id, nb_cell_winner, tie = define_winner(game_state.get("board"))
     data_winner = {"name": game_player.user.username, "nb_cell": nb_cell_winner, "tie":tie}
-    game_player.user.nb_games_wins+=1
-    game_player.user.save()
     game_state["winner"] =  data_winner
     return game_state
 

@@ -40,7 +40,9 @@ def index(request):
             game_player2 = get_game_player(username2,game_state_data, [7,7],colors[1])
             game_players = [game_player1, game_player2]
             indice=0
-            game_state = build_game_state(game_state_data, [game_player1, game_player2], game_player1.auto_increment_id,0)  
+            game_state = build_game_state(game_state_data, [game_player1, game_player2], game_player1.auto_increment_id,0)
+
+            #2 IA jouent ensemble  
             while is_current_player_ai(game_players[indice]) and not end_of_game(game_state_data.board):
                 movement = play(board, game_players,indice)
                 game_state_data = move_pos(game_players[indice], movement, game_state_data, game_players)
@@ -58,8 +60,6 @@ def index(request):
                     game_players[winner_id-1].user.save()
                     data_winner = {"name": game_players[winner_id-1].user.username, "nb_cell": nb_cell_winner, "tie":tie}
                     game_state["winner"] =  data_winner
-                    print('nbgamesu1u2 : ',u1.nb_games,u2.nb_games)
-                    print('nbwins : ',game_players[winner_id-1].user.nb_games_wins)
                     if(game_state.get("winner").get("tie")):
                         text = "Egalité avec "+str(game_state.get("winner").get("nb_cell"))
                     else:
@@ -92,6 +92,7 @@ def apply_move(request) :
             game_players[winner_id-1].user.nb_games_wins+=1
             game_players[winner_id-1].user.save()
             game_state = print_winner(game_state, game_players[winner_id-1])
+            return JsonResponse(game_state)
         else:
             curr_player = change_player(game_players, indice)
             game_state = build_game_state(game_state_data, game_players, curr_player, 0)

@@ -36,6 +36,7 @@ INSTALLED_APPS = [
     'game.apps.GameConfig',
     'AI.apps.AiConfig',
     'train.apps.TrainConfig',
+    'stats.apps.StatsConfig',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
