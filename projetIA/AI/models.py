@@ -7,6 +7,8 @@ class AI(models.Model):
     speed_learning = models.IntegerField()
     learning_rate = models.FloatField()
     manager = models.Manager()
+    nb_games_training = models.IntegerField()
+    nb_games_training_wins = models.IntegerField()
 
 
 

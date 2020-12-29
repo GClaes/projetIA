@@ -10,7 +10,7 @@ from game.business import *
 from game.services import *
 from game.exceptions import *
 from AI.models import AI
-from AI.views import play_ai
+from AI.views import play_ai,epsilon_greedy
 
 class NewGameForm(forms.Form):
     player1 = forms.CharField(label="Player 1")
@@ -39,6 +39,12 @@ def index(request):
             game_player1 = get_game_player(username1,game_state_data, [0,0],colors[0])
             game_player2 = get_game_player(username2,game_state_data, [7,7],colors[1])
             game_players = [game_player1, game_player2]
+
+            for player in game_players:
+                if is_current_player_ai(player):
+                    player.user.ai_id.epsilon = epsilon_greedy(player.user)
+                    player.user.ai_id.save()
+
             indice=0
             game_state = build_game_state(game_state_data, [game_player1, game_player2], game_player1.auto_increment_id,0)
 

@@ -16,7 +16,7 @@ def play_ai(board,pos1,pos2,user,game_player,curr_player):
     left=[0,-1]
     tab_direction=[up,down,right,left]
 
-    eps = epsilon_greedy(ai,user)
+    eps = user.ai_id.epsilon
     board_db = verify_board(board,pos1,pos2,ai)
     direction = move(eps,board_db.q_table,board_db.position)
     while not verify_direction(direction,board,pos1,curr_player):
@@ -26,14 +26,13 @@ def play_ai(board,pos1,pos2,user,game_player,curr_player):
     direction_board = [tab_direction[direction],board_db]
     return direction_board
 
-def epsilon_greedy(ai,user): 
-    E=ai.epsilon
+def epsilon_greedy(user): 
+    E=user.ai_id.epsilon
     i_partie=user.nb_games
-    if i_partie % ai.speed_learning == 0:
+    if i_partie % user.ai_id.speed_learning == 0:
         E = (E /100) * 95
     if E < 5: return 5
-    ai.epsilon=E
-    ai.save()
+    print(E)
     return E
 
 def move(eps,q_table,position):
@@ -160,3 +159,4 @@ def count_cells(old_board, new_board, num_player):
     return new_nb_boxes - old_nb_boxes
     
     
+

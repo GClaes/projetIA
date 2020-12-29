@@ -38,7 +38,8 @@ def printData(user, request):
 def get_data(user):
     data = {}
     data["user"]=user
-    data["prc"] = user.nb_games_wins / user.nb_games * 100
+    data["prc"] = user.nb_games_wins / user.nb_games * 100 if user.nb_games != 0 else 0
     if user.ai_id:
         data["ai"]=user.ai_id
+        data["prc2"] = user.ai_id.nb_games_training_wins / user.ai_id.nb_games_training * 100 if user.ai_id.nb_games_training != 0 else 0 
     return data

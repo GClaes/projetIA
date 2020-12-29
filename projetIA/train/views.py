@@ -9,6 +9,8 @@ from game.services import *
 from game.exceptions import *
 from AI.models import AI
 from AI.views import play_ai
+from AI.train import *
+from django.db import transaction
 
 
 
@@ -57,18 +59,32 @@ def index(request):
         return render(request, "train/index.html", { "form": form })
 
 def setup_games(ia1, ia2, nb_games):
+    limit = 0
+    setup_training(ia1.ai_id, ia2.ai_id)
     for i in range(nb_games):
         print("Game "+str(i+1)+" en cours")
-        play(ia1, ia2)
+        limit = play(ia1, ia2, limit)
         print("Game "+str(i+1)+" terminée")
+    clear_data()
+    print("Les variables globales ont été nettoyées")
+    
 
 
-def play(u1, u2):
+def play(u1, u2, limit):
     board = [[1,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,2]]
     game_state_data = Game_State(current_player=1, board=board)
     game_state_data.save()
     game_player1 = Game_Player(user=u1, game_state=game_state_data, pos=[0,0])
     game_player2 = Game_Player(user=u2, game_state=game_state_data, pos=[7,7])
+    game_player1.user.ai_id.nb_games_training+=1
+    game_player1.user.ai_id.save()
+    game_player2.user.ai_id.nb_games_training+=1
+    game_player2.user.ai_id.save()
+    current_player = None
+    u1.ai_id.epsilon = epsilon_greedy(u1.ai_id)
+    u2.ai_id.epsilon = epsilon_greedy(u2.ai_id)
+
+
     game_players = [game_player1, game_player2]
     indice=0
     game_state = build_game_state(game_state_data, [game_player1, game_player2], game_player1.auto_increment_id,0)  
@@ -76,29 +92,61 @@ def play(u1, u2):
         user = get_user_from_player(u1, u2, game_players[indice])
         movement = do_play(board, game_players,indice, user)
         game_state_data = move_pos(game_players[indice], movement, game_state_data, game_players)
-        current_player = change_player(game_players, indice)
-        game_state_data.current_player = current_player
+        indice = switch_player(indice)
         game_state = build_game_state(game_state_data, [game_player1, game_player2], game_player2.auto_increment_id,0)
-        indice = index_player(current_player, game_players)
         if end_of_game(game_state_data.board):
             game_state = build_game_state(game_state_data, game_players, current_player, 0)
             winner_id, nb_cell_winner, tie = define_winner(game_state.get("board"))
             data_winner = {"name": game_players[winner_id-1].user.username, "nb_cell": nb_cell_winner, "tie":tie}
             game_state["winner"] =  data_winner
+            game_players[winner_id-1].user.ai_id.nb_games_training_wins+=1
+            game_players[winner_id-1].user.ai_id.save()
+            limit = save_data_from_training(limit)
             with open("log.txt", "a") as f:
                 f.write("Tie\n"if game_state.get("winner").get("tie") else ""+ game_state.get("winner").get("name")+" with "+str(game_state.get("winner").get("nb_cell"))+" cells.\n")
+                return limit
 
-
-
+def switch_player(indice):
+    return 1 if indice == 0 else 0
+    
 def do_play(board, game_players, indice, user):
     if indice == 1:
         i_o = 0
     else:
         i_o = 1
-    direction_board =play_ai(board,game_players[indice].pos,game_players[i_o].pos,user,game_players[indice],indice)
+    direction_board =training_play(board,game_players[indice].pos,game_players[i_o].pos,game_players[indice],indice, user.ai_id)
     movement = direction_board[0]
     game_players[indice].previous_state_ai = direction_board[1]
     return movement 
 
+
 def get_user_from_player(u1,u2, game_player):
     return u1 if game_player.user.username == u1.username else u2
+
+"""
+Difference between Atomic Transaction and Bulk create:
+For 50000 saves
+Atomic Transaction takes: 27s
+Bulk create takes: 3.5s
+https://pmbaumgartner.github.io/blog/the-fastest-way-to-load-data-django-postgresql/
+"""
+"""
+@transaction.atomic 
+def save_data_from_training():
+    ai_s, states = get_data_from_training()
+    for ai in ai_s:
+        ai.save()
+    for state in states:
+        state.save()
+"""
+
+def save_data_from_training(limit):
+    ai_s, states = get_data_from_training()
+    states_list = []
+    for ai in ai_s:
+        ai.save()
+    for state in states[limit:len(states)]:
+        states_list.append(state)
+    State.manager.bulk_create(states_list)
+    print(len(states_list))
+    return get_limit()

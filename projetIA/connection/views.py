@@ -219,7 +219,7 @@ def signup_ai(request):
             color2 = form.cleaned_data.get("fav_color2")
             cd_colors.append(color1[0])
             cd_colors.append(color2[0])
-            ai = AI(epsilon= c_epsilon,learning_rate = c_learning_rate,speed_learning = c_speed_learning)
+            ai = AI(epsilon= c_epsilon,learning_rate = c_learning_rate,speed_learning = c_speed_learning, nb_games_training = 0, nb_games_training_wins = 0)
             ai.save()
             user = User(username = c_ai_name, user_data = None, color1=cd_colors[0], color2=cd_colors[1],nb_games_wins = 0,nb_games = 0,ai_id = ai)
             user.save()
