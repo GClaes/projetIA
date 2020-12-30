@@ -36,8 +36,8 @@ def index(request):
             u2.nb_games+=1
             u2.save()
             colors = build_colors([u1,u2])
-            game_player1 = get_game_player(username1,game_state_data, [0,0],colors[0])
-            game_player2 = get_game_player(username2,game_state_data, [7,7],colors[1])
+            game_player1 = get_game_player(username1,game_state_data, [0,0],colors[0],1)
+            game_player2 = get_game_player(username2,game_state_data, [7,7],colors[1],2)
             game_players = [game_player1, game_player2]
 
             for player in game_players:
@@ -70,6 +70,7 @@ def index(request):
                         text = "Egalité avec "+str(game_state.get("winner").get("nb_cell"))
                     else:
                         text = "Resultat: "+game_state.get("winner").get("name")+" avec "+str(game_state.get("winner").get("nb_cell"))
+                    game_state_data.save()
                     return HttpResponse(text)
             return render(request, 'game/new_game.html', game_state)
         return HttpResponse("KO")
@@ -98,6 +99,7 @@ def apply_move(request) :
             game_players[winner_id-1].user.nb_games_wins+=1
             game_players[winner_id-1].user.save()
             game_state = print_winner(game_state, game_players[winner_id-1])
+            save_game_turn(game_state_data, game_players)
             return JsonResponse(game_state)
         else:
             curr_player = change_player(game_players, indice)
@@ -115,6 +117,7 @@ def apply_move(request) :
             game_players[winner_id-1].user.nb_games_wins+=1
             game_players[winner_id-1].user.save()
             game_state = print_winner(game_state, game_players[winner_id-1])
+
     return JsonResponse(game_state)
 
 def ai_play(curr_player, game_players, game_state_data, indice):

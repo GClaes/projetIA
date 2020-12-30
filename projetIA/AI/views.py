@@ -7,14 +7,15 @@ import random
 from random import randint
 from functools import reduce
 
+up = [-1,0]
+down = [1,0]
+right = [0,1]
+left=[0,-1]
+tab_direction=[up,down,right,left]
+
 
 def play_ai(board,pos1,pos2,user,game_player,curr_player):
     ai = AI.manager.get(id = user.ai_id.id)
-    up = [-1,0]
-    down = [1,0]
-    right = [0,1]
-    left=[0,-1]
-    tab_direction=[up,down,right,left]
 
     eps = user.ai_id.epsilon
     board_db = verify_board(board,pos1,pos2,ai)
@@ -32,7 +33,6 @@ def epsilon_greedy(user):
     if i_partie % user.ai_id.speed_learning == 0:
         E = (E /100) * 95
     if E < 5: return 5
-    print(E)
     return E
 
 def move(eps,q_table,position):
@@ -49,11 +49,6 @@ def qtable_count_value(q_table):
     return reduce(lambda x,y: x+y, q_table)
 
 def verify_direction(direction,board,pos,curr_player):
-    up = [-1,0]
-    down = [1,0]
-    right = [0,1]
-    left=[0,-1]
-    tab_direction=[up,down,right,left]
     x=pos[0]+tab_direction[direction][0]
     y=pos[1]+tab_direction[direction][1]
    
@@ -96,14 +91,7 @@ def update_q_table(board,board_db,pos1,pos2,ai,game_player,direction):
 def count_boxes(board,num_player):
     return reduce(lambda x,y: x+y, board).count(num_player)
 
-def best_reward_and_position(pos,previous_board,num_player,old_pos):
-    
-    up = [-1,0]
-    down = [1,0]
-    right = [0,1]
-    left=[0,-1]
-    tab_direction=[up,down,right,left]
-    
+def best_reward_and_position(pos,previous_board,num_player,old_pos):   
     best_points = 0
     best_position = [pos[0]+tab_direction[0][0],pos[1]+tab_direction[0][1]]
 

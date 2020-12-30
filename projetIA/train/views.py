@@ -11,7 +11,7 @@ from AI.models import AI
 from AI.views import play_ai
 from AI.train import *
 from django.db import transaction
-
+import time
 
 
 class NewGameForm(forms.Form):
@@ -59,18 +59,33 @@ def index(request):
         return render(request, "train/index.html", { "form": form })
 
 def setup_games(ia1, ia2, nb_games):
-    limit = 0
-    setup_training(ia1.ai_id, ia2.ai_id)
+    states = get_states(ia1, ia2)
+    limit = setup_training(ia1.ai_id, ia2.ai_id, states)
+    print(str(len(states))+" états ont été chargés avant le lancement de l'entrainement.")
+    chronos = []
     for i in range(nb_games):
         print("Game "+str(i+1)+" en cours")
+        debut_game = time.time()
         limit = play(ia1, ia2, limit)
+        fin_game = time.time()
+        duree_game = fin_game - debut_game
+        chronos.append(duree_game)
+        print(str(duree_game)+" secondes")
         print("Game "+str(i+1)+" terminée")
     clear_data()
     print("Les variables globales ont été nettoyées")
+    temps_total = reduce(lambda x,y: x+y,chronos)
+    print("Les "+str(nb_games)+" parties ont pris "+str(round(temps_total,2))+" secondes à se réaliser, soit "+str(round(temps_total/nb_games,2))+" secondes par partie en moyenne.")
+    
+def get_states(ai1, ai2):
+    Q = State.manager.all()
+    return list(Q.filter(ai_id = ai1.ai_id))+list(Q.filter(ai_id = ai2.ai_id))
     
 
-
 def play(u1, u2, limit):
+    """
+    SETUP DE LA GAME
+    """
     board = [[1,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,2]]
     game_state_data = Game_State(current_player=1, board=board)
     game_state_data.save()
@@ -81,13 +96,14 @@ def play(u1, u2, limit):
     game_player2.user.ai_id.nb_games_training+=1
     game_player2.user.ai_id.save()
     current_player = None
-    u1.ai_id.epsilon = epsilon_greedy(u1.ai_id)
-    u2.ai_id.epsilon = epsilon_greedy(u2.ai_id)
-
-
+    u1.ai_id.epsilon = epsilon_greedy_training(u1.ai_id)
+    u2.ai_id.epsilon = epsilon_greedy_training(u2.ai_id)
     game_players = [game_player1, game_player2]
     indice=0
     game_state = build_game_state(game_state_data, [game_player1, game_player2], game_player1.auto_increment_id,0)  
+    """
+    DEBUT DE LA PARTIE
+    """
     while is_current_player_ai(game_players[indice]) and not end_of_game(game_state_data.board):
         user = get_user_from_player(u1, u2, game_players[indice])
         movement = do_play(board, game_players,indice, user)
@@ -95,6 +111,9 @@ def play(u1, u2, limit):
         indice = switch_player(indice)
         game_state = build_game_state(game_state_data, [game_player1, game_player2], game_player2.auto_increment_id,0)
         if end_of_game(game_state_data.board):
+            """
+            FIN DE LA PARTIE
+            """
             game_state = build_game_state(game_state_data, game_players, current_player, 0)
             winner_id, nb_cell_winner, tie = define_winner(game_state.get("board"))
             data_winner = {"name": game_players[winner_id-1].user.username, "nb_cell": nb_cell_winner, "tie":tie}
@@ -132,14 +151,15 @@ https://pmbaumgartner.github.io/blog/the-fastest-way-to-load-data-django-postgre
 """
 """
 @transaction.atomic 
-def save_data_from_training():
+def save_data_from_training(limit):
     ai_s, states = get_data_from_training()
     for ai in ai_s:
         ai.save()
-    for state in states:
+    for state in states[limit:len(states)]:
         state.save()
-"""
+    return get_limit()
 
+"""
 def save_data_from_training(limit):
     ai_s, states = get_data_from_training()
     states_list = []
@@ -148,5 +168,4 @@ def save_data_from_training(limit):
     for state in states[limit:len(states)]:
         states_list.append(state)
     State.manager.bulk_create(states_list)
-    print(len(states_list))
     return get_limit()

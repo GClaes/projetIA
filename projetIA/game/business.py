@@ -31,7 +31,9 @@ def update_board_content(board, player, num_player, previous_pos):
     return board, player.pos
 
 def string_to_list(s):
-    return ast.literal_eval(s)
+    if isinstance(s, str):
+        return ast.literal_eval(s)
+    return s
 
 def listing_game_players(game_players):
     return listing_player_pos(list(game_players))
@@ -235,8 +237,8 @@ def save_game_turn(game_state_data, game_players):
     for game_player in game_players:
         save_data(game_player)
 
-def get_game_player(username,game_state_data, pos,col):
+def get_game_player(username,game_state_data, pos,col, num_player):
     u = User.manager.get(username = username)
-    game_player = Game_Player(user=u, game_state=game_state_data, pos=pos , color = col)
+    game_player = Game_Player(user=u, game_state=game_state_data, pos=pos , color = col, num_player = num_player)
     game_player.save()
     return game_player

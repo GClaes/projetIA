@@ -41,9 +41,14 @@
             <td>{{data.prc}}%</td>
         </tr>
         <tr>
+            <td>Average cell by game</td>
+            <td>{{data.nb_cell_mean}}</td>
+        </tr>
+        <tr>
             <td>Favourite color</td>
             <td>{{data.user.color1}}</td>
         </tr>
+        {%if data.ai.epsilon%}
         <tr>
             <td>Epsilon greedy</td>
             <td>{{data.ai.epsilon}}</td>
@@ -68,5 +73,8 @@
             <td>Training win pourcentage</td>
             <td>{{data.prc2}}%</td>
         </tr>
+        {%endif %}
     </table>
   </form>
+
+  

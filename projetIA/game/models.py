@@ -17,4 +17,5 @@ class Game_Player(models.Model):
     pos=models.CharField(max_length=5)
     color = models.CharField(max_length=146)
     previous_state_ai=models.ForeignKey(State,on_delete=models.CASCADE,blank=True,null=True)
+    num_player = models.IntegerField()
     manager = models.Manager()
