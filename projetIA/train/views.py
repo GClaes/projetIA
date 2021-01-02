@@ -78,11 +78,14 @@ def play(u1, u2):
     """
     SETUP DE LA GAME
     """
-    board = [[1,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,2]]
+    #board = [[1,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,2]]
+    board = [[1,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,2]]
     game_state_data = Game_State(current_player=1, board=board)
     game_state_data.save()
-    game_player1 = Game_Player(user=u1, game_state=game_state_data, pos=[0,0])
-    game_player2 = Game_Player(user=u2, game_state=game_state_data, pos=[7,7])
+    #game_player1 = Game_Player(user=u1, game_state=game_state_data, pos=[0,0])
+    #game_player2 = Game_Player(user=u2, game_state=game_state_data, pos=[7,7])
+    game_player1 = Game_Player(user=u1,game_state=game_state_data, pos=[0,0])
+    game_player2 = Game_Player(user=u2,game_state=game_state_data, pos=[3,3])
     game_player1.user.ai_id.nb_games_training+=1
     game_player1.user.ai_id.save()
     game_player2.user.ai_id.nb_games_training+=1

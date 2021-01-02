@@ -24,7 +24,8 @@ def index(request):
     if request.method == "POST": 
         form = NewGameForm(request.POST)
         if form.is_valid():
-            board = [[1,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,2]]
+            #board = [[1,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,2]]
+            board = [[1,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,2]]
             game_state_data = Game_State(current_player=1, board=board)
             game_state_data.save()
             username1 = form.cleaned_data.get("player1")
@@ -36,8 +37,11 @@ def index(request):
             u2.nb_games+=1
             u2.save()
             colors = build_colors([u1,u2])
+            #game_player1 = get_game_player(username1,game_state_data, [0,0],colors[0],1)
+            #game_player2 = get_game_player(username2,game_state_data, [7,7],colors[1],2)
             game_player1 = get_game_player(username1,game_state_data, [0,0],colors[0],1)
-            game_player2 = get_game_player(username2,game_state_data, [7,7],colors[1],2)
+            game_player2 = get_game_player(username2,game_state_data, [3,3],colors[1],2)
+
             game_players = [game_player1, game_player2]
 
             for player in game_players:
@@ -136,5 +140,6 @@ def play(board, game_players, indice):
     user = User.manager.get(username=game_players[indice].user.username)
     direction_board =play_ai(board,game_players[indice].pos,game_players[i_o].pos,user,game_players[indice],indice)
     movement = direction_board[0]
+    game_players[indice].previous_state_ai = direction_board[1]
     save_data(game_players[indice])
     return movement 
