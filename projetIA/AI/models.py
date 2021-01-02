@@ -14,11 +14,11 @@ class AI(models.Model):
 
 class State(models.Model):
     id = models.AutoField(primary_key = True)
-    board=models.CharField(max_length=146)
-    position = models.CharField(max_length=2)
-    position2 = models.CharField(max_length=2)
+    board=models.CharField(max_length=146, db_index=True)
+    position = models.CharField(max_length=2, db_index=True)
+    position2 = models.CharField(max_length=2, db_index=True)
     q_table = models.CharField(max_length=100)
-    ai_id=models.ForeignKey(AI,on_delete=models.CASCADE)
+    ai_id=models.ForeignKey(AI,on_delete=models.CASCADE, db_index=True)
     manager = models.Manager()
 
 

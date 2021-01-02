@@ -59,30 +59,22 @@ def index(request):
         return render(request, "train/index.html", { "form": form })
 
 def setup_games(ia1, ia2, nb_games):
-    states = get_states(ia1, ia2)
-    limit = setup_training(ia1.ai_id, ia2.ai_id, states)
-    print(str(len(states))+" états ont été chargés avant le lancement de l'entrainement.")
+    setup_training(ia1.ai_id, ia2.ai_id)
     chronos = []
     for i in range(nb_games):
         print("Game "+str(i+1)+" en cours")
         debut_game = time.time()
-        limit = play(ia1, ia2, limit)
+        play(ia1, ia2)
         fin_game = time.time()
         duree_game = fin_game - debut_game
         chronos.append(duree_game)
         print(str(duree_game)+" secondes")
         print("Game "+str(i+1)+" terminée")
-    clear_data()
     print("Les variables globales ont été nettoyées")
     temps_total = reduce(lambda x,y: x+y,chronos)
-    print("Les "+str(nb_games)+" parties ont pris "+str(round(temps_total,2))+" secondes à se réaliser, soit "+str(round(temps_total/nb_games,2))+" secondes par partie en moyenne.")
-    
-def get_states(ai1, ai2):
-    Q = State.manager.all()
-    return list(Q.filter(ai_id = ai1.ai_id))+list(Q.filter(ai_id = ai2.ai_id))
-    
+    print("Les "+str(nb_games)+" parties ont pris "+str(round(temps_total,2))+" secondes à se réaliser, soit "+str(round(temps_total/nb_games,2))+" secondes par partie en moyenne.")    
 
-def play(u1, u2, limit):
+def play(u1, u2):
     """
     SETUP DE LA GAME
     """
@@ -120,10 +112,10 @@ def play(u1, u2, limit):
             game_state["winner"] =  data_winner
             game_players[winner_id-1].user.ai_id.nb_games_training_wins+=1
             game_players[winner_id-1].user.ai_id.save()
-            limit = save_data_from_training(limit)
+            save_data_from_training()
+            clear_data()
             with open("log.txt", "a") as f:
                 f.write("Tie\n"if game_state.get("winner").get("tie") else ""+ game_state.get("winner").get("name")+" with "+str(game_state.get("winner").get("nb_cell"))+" cells.\n")
-                return limit
 
 def switch_player(indice):
     return 1 if indice == 0 else 0
@@ -149,23 +141,30 @@ Atomic Transaction takes: 27s
 Bulk create takes: 3.5s
 https://pmbaumgartner.github.io/blog/the-fastest-way-to-load-data-django-postgresql/
 """
-"""
+
 @transaction.atomic 
-def save_data_from_training(limit):
+def save_data_from_training():
     ai_s, states = get_data_from_training()
     for ai in ai_s:
         ai.save()
-    for state in states[limit:len(states)]:
+    for state in states:
         state.save()
-    return get_limit()
+    print(str(len(states))+" nouveaux états créés")
+
 
 """
-def save_data_from_training(limit):
+The problem with the bulk_create method is that it doesn't do update.
+It only does create statement, which is a problem because we often update State.
+If we decide to fix this with conditions, we will probably be slower than with an atomic transaction due to conditions.
+"""
+"""
+def save_data_from_training():
     ai_s, states = get_data_from_training()
     states_list = []
     for ai in ai_s:
         ai.save()
-    for state in states[limit:len(states)]:
+    for state in states:
         states_list.append(state)
     State.manager.bulk_create(states_list)
-    return get_limit()
+    print(str(len(states_list))+" nouveaux états créés")
+   """ 

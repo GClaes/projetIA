@@ -22,6 +22,7 @@ def play_ai(board,pos1,pos2,user,game_player,curr_player):
     direction = move(eps,board_db.q_table,board_db.position)
     while not verify_direction(direction,board,pos1,curr_player):
         direction = move(eps,board_db.q_table,board_db.position)
+    print(game_player.previous_state_ai)
     if game_player.previous_state_ai:
         update_q_table(board,board_db,pos1,pos2,user.ai_id,game_player,direction)
     direction_board = [tab_direction[direction],board_db]
@@ -64,7 +65,6 @@ def verify_board(searched_board,searched_position1,searched_position2,ai):
 
     try:
         board_db = State.manager.get(board = board, position = pos1,position2 = pos2,ai_id=ai)
-
     except Exception as e:
         board_db = register_board(board,pos1,pos2,ai)
     return board_db
@@ -91,7 +91,8 @@ def update_q_table(board,board_db,pos1,pos2,ai,game_player,direction):
 def count_boxes(board,num_player):
     return reduce(lambda x,y: x+y, board).count(num_player)
 
-def best_reward_and_position(pos,previous_board,num_player,old_pos):   
+def best_reward_and_position(pos,previous_board,num_player,old_pos):  
+    print("a") 
     best_points = 0
     best_position = [pos[0]+tab_direction[0][0],pos[1]+tab_direction[0][1]]
 
@@ -102,6 +103,7 @@ def best_reward_and_position(pos,previous_board,num_player,old_pos):
         previous_points = count_boxes(previous_board,num_player)
         new_points = count_boxes(previous_board,num_player)
         reward = new_points - previous_points
+        print(reward)
         if reward > best_points:
             best_points = reward
             best_position = pos
@@ -109,6 +111,7 @@ def best_reward_and_position(pos,previous_board,num_player,old_pos):
     return best_points,best_position
 
 def calculate_reward(board,ai_position,opp_position,gameplayer): 
+    print("t")
     previous_state = gameplayer.previous_state_ai
     try:
         pos_ai = string_to_list( previous_state.position)
