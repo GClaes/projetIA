@@ -9,6 +9,7 @@ class AI(models.Model):
     manager = models.Manager()
     nb_games_training = models.IntegerField()
     nb_games_training_wins = models.IntegerField()
+    old_direction = models.IntegerField(null=True)
 
 
 

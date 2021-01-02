@@ -22,7 +22,10 @@ def play_ai(board,pos1,pos2,user,game_player,curr_player):
     while not verify_direction(direction,board,pos1,curr_player):
         direction = move(eps,board_db.q_table,board_db.position)
     if game_player.previous_state_ai:
-        update_q_table(board,board_db,pos1,pos2,user.ai_id,game_player,direction)
+        update_q_table(board,board_db,pos1,pos2,user.ai_id,game_player,ai.old_direction)
+    ai.old_direction = direction
+    print("old position", ai.old_direction)
+    ai.save()
     direction_board = [tab_direction[direction],board_db]
     return direction_board
 
@@ -77,9 +80,9 @@ def update_q_table(board,board_db,pos1,pos2,ai,game_player,direction): #0 = up ,
     q_table_list = string_to_list(board_db.q_table)
     max_q = max(q_table_list)
     recompense=calculate_reward(board,pos1,pos2,game_player)
-    print(direction)
+    print("old direction 2",direction)
     print(old_q)
-    print(recompense)
+    print("recompense",recompense)
     old_q[direction] = old_q[direction] + ai.learning_rate*(recompense+max_q-old_q[direction])
     state=game_player.previous_state_ai
     state.q_table=old_q
@@ -88,7 +91,7 @@ def update_q_table(board,board_db,pos1,pos2,ai,game_player,direction): #0 = up ,
     game_player.save()
     board_db.save()
     ai.save()
-
+    print(old_q)
 def count_boxes(board,num_player):
     return reduce(lambda x,y: x+y, board).count(num_player)
 
