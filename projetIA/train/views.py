@@ -99,9 +99,10 @@ def play(u1, u2):
     """
     DEBUT DE LA PARTIE
     """
+    direction = None
     while is_current_player_ai(game_players[indice]) and not end_of_game(game_state_data.board):
         user = get_user_from_player(u1, u2, game_players[indice])
-        movement = do_play(board, game_players,indice, user)
+        movement, direction = do_play(board, game_players,indice, user, direction)
         game_state_data = move_pos(game_players[indice], movement, game_state_data, game_players)
         indice = switch_player(indice)
         game_state = build_game_state(game_state_data, [game_player1, game_player2], game_player2.auto_increment_id,0)
@@ -123,15 +124,15 @@ def play(u1, u2):
 def switch_player(indice):
     return 1 if indice == 0 else 0
     
-def do_play(board, game_players, indice, user):
+def do_play(board, game_players, indice, user, direction):
     if indice == 1:
         i_o = 0
     else:
         i_o = 1
-    direction_board =training_play(board,game_players[indice].pos,game_players[i_o].pos,game_players[indice],indice, user.ai_id)
+    direction_board, direction =training_play(board,game_players[indice].pos,game_players[i_o].pos,game_players[indice],indice, user.ai_id, direction)
     movement = direction_board[0]
     game_players[indice].previous_state_ai = direction_board[1]
-    return movement 
+    return movement, direction
 
 
 def get_user_from_player(u1,u2, game_player):

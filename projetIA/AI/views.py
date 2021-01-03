@@ -22,14 +22,11 @@ def play_ai(board,pos1,pos2,user,game_player,curr_player):
     while not verify_direction(direction,board,pos1,curr_player):
         direction = move(eps,board_db.q_table,board_db.position)
     if game_player.previous_state_ai:
-        update_q_table(board,board_db,pos1,pos2,user.ai_id,game_player,ai.old_direction)
-    ai.old_direction = direction
-    print("old position", ai.old_direction)
-    ai.save()
+        update_q_table(board,board_db,pos1,pos2,user.ai_id,game_player,game_player.old_direction, direction)
     direction_board = [tab_direction[direction],board_db]
     return direction_board
 
-def epsilon_greedy(user): #V
+def epsilon_greedy(user):
     E=user.ai_id.epsilon
     i_partie=user.nb_games
     if i_partie % user.ai_id.speed_learning == 0:
@@ -75,19 +72,21 @@ def register_board(board,position,position2,ai):
     state.save()
     return state
 
-def update_q_table(board,board_db,pos1,pos2,ai,game_player,direction): #0 = up , 1 = down , 2 = right , 3 = left
+def update_q_table(board,board_db,pos1,pos2,ai,game_player,old_direction, direction): #0 = up , 1 = down , 2 = right , 3 = left
     old_q = string_to_list(game_player.previous_state_ai.q_table)
     q_table_list = string_to_list(board_db.q_table)
     max_q = max(q_table_list)
     recompense=calculate_reward(board,pos1,pos2,game_player)
-    print("old direction 2",direction)
+    print("old direction 2",old_direction)
     print(old_q)
     print("recompense",recompense)
-    old_q[direction] = old_q[direction] + ai.learning_rate*(recompense+max_q-old_q[direction])
+    if(old_direction is not None):
+        old_q[old_direction] = old_q[old_direction] + ai.learning_rate*(recompense+max_q-old_q[old_direction])
     state=game_player.previous_state_ai
     state.q_table=old_q
     state.save()
     game_player.previous_state_ai.q_table=old_q
+    game_player.old_direction = direction
     game_player.save()
     board_db.save()
     ai.save()
